@@ -1,0 +1,25 @@
+
+syntax = "proto3";
+
+option go_package = "github.com/trevatk/block-broker/internal/adapter/port/rpc/proto/messaging/v1";
+
+package messaging.v1;
+
+service MessagingService {
+    rpc Publish (Envelope) returns (Stub) {}
+    rpc Subscribe (Subscription) returns (stream Envelope) {}
+    rpc RequestResponse (Envelope) returns (Envelope) {}
+}
+
+message Envelope {
+    string topic = 1;
+    bytes payload = 2;
+}
+
+message Stub {
+    string envelope_id = 1;
+}
+
+message Subscription {
+    string topic = 1;
+} 
