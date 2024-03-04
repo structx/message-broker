@@ -7,18 +7,13 @@ import (
 	"time"
 
 	"github.com/go-fuego/fuego"
-	"github.com/google/uuid"
 
 	"go.uber.org/zap"
 
 	"github.com/trevatk/block-broker/internal/core/domain"
 )
 
-const (
-	messageId = "/message/{id}"
-)
-
-// MessageController
+// MessageController message controller class
 type MessageController struct {
 	log *zap.SugaredLogger
 	m   domain.Messenger
@@ -27,7 +22,7 @@ type MessageController struct {
 // interface compliance
 var _ Controller = (*MessageController)(nil)
 
-// NewMessageController
+// NewMessageController return new message controller
 func NewMessageController(logger *zap.Logger, messenger domain.Messenger) *MessageController {
 	return &MessageController{
 		log: logger.Sugar().Named("message_controller"),
@@ -35,17 +30,17 @@ func NewMessageController(logger *zap.Logger, messenger domain.Messenger) *Messa
 	}
 }
 
-// RegisterRoutesV1
+// RegisterRoutesV1 register routes on v1 router
 func (mc *MessageController) RegisterRoutesV1(s *fuego.Server) {
 	fuego.GetStd(s, "/api/v1/message/{id}", mc.Get).
 		Summary("Fetch message").
-		Description("Fetch message by id").
+		Description("Fetch message by hash").
 		AddTags("Messages").
 		OperationID("fetchMessage").
-		QueryParam("messageId", "message unique identifier", fuego.OpenAPIParam{
+		QueryParam("messageID", "message hash", fuego.OpenAPIParam{
 			Required: true,
 			Type:     "string",
-			Example:  "322befbd-ed13-4566-93e7-24fe87e5306f",
+			Example:  "",
 		})
 	fuego.GetStd(s, "/api/v1/messages/topics", mc.ListTopics).
 		Summary("List topics").
@@ -54,7 +49,7 @@ func (mc *MessageController) RegisterRoutesV1(s *fuego.Server) {
 		OperationID("listTopics")
 }
 
-// MessagePayload
+// MessagePayload http message model
 type MessagePayload struct {
 	UID       string    `json:"uid"`
 	Topic     string    `json:"topic"`
@@ -62,29 +57,20 @@ type MessagePayload struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
-// GetMessageResponse
+// GetMessageResponse http get message response model
 type GetMessageResponse struct {
 	Payload *MessagePayload `json:"payload"`
 }
 
-// Get
+// Get fetch message by hash
 func (mc *MessageController) Get(w http.ResponseWriter, r *http.Request) {
 
-	uri := r.URL.String()
-	uris := strings.Split(uri, "/")
+	url := r.URL.String()
+	urlslice := strings.Split(url, "/")
 
-	id := uris[len(uris)-1]
+	hash := urlslice[len(urlslice)-1]
 
-	uid, err := uuid.Parse(id)
-	if err != nil {
-		mc.log.Errorf("failed to parse uuid %v", err)
-		http.Error(w, "invalid request parameter", http.StatusBadRequest)
-		return
-	}
-
-	ctx := r.Context()
-
-	msg, err := mc.m.Read(ctx, uid)
+	msg, err := mc.m.Read(hash)
 	if err != nil {
 		mc.log.Errorf("failed to read message %v", err)
 		http.Error(w, "unable to read message", http.StatusInternalServerError)
@@ -108,17 +94,15 @@ func (mc *MessageController) Get(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// ListTopicsResponse
-type ListTopicsReponse struct {
+// ListTopicsResponse http list topics response model
+type ListTopicsResponse struct {
 	Topics []string `json:"topics"`
 }
 
-// ListTopics
-func (mc *MessageController) ListTopics(w http.ResponseWriter, r *http.Request) {
+// ListTopics fetch topics
+func (mc *MessageController) ListTopics(w http.ResponseWriter, _ *http.Request) {
 
-	ctx := r.Context()
-
-	topics, err := mc.m.ListTopics(ctx)
+	topics, err := mc.m.ListTopics(0, 0)
 	if err != nil {
 		mc.log.Errorf("m.ListTopics: %v", err)
 		http.Error(w, "unable to list topics", http.StatusInternalServerError)
@@ -126,7 +110,7 @@ func (mc *MessageController) ListTopics(w http.ResponseWriter, r *http.Request) 
 
 	}
 
-	response := &ListTopicsReponse{
+	response := &ListTopicsResponse{
 		Topics: topics,
 	}
 
@@ -138,5 +122,8 @@ func (mc *MessageController) ListTopics(w http.ResponseWriter, r *http.Request) 
 	}
 }
 
-// ListByTopic
-func (mc *MessageController) ListByTopic(w http.ResponseWriter, r *http.Request) {}
+// ListByTopic fetch messages by topic
+func (mc *MessageController) ListByTopic(_ http.ResponseWriter, _ *http.Request) {
+	// TODO:
+	// implement handler
+}

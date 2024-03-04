@@ -1,6 +1,6 @@
 package domain
 
-// Chain
+// Chain blockchain interface
 //
 //go:generate mockery --name Chain
 type Chain interface {

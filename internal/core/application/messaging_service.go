@@ -1,3 +1,4 @@
+// Package application service logic
 package application
 
 import (
@@ -6,12 +7,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/google/uuid"
-
 	"github.com/trevatk/block-broker/internal/core/domain"
 )
 
-// MessagingService
+// MessagingService messaging service implementation
 type MessagingService struct {
 	c domain.Chain
 }
@@ -19,15 +18,15 @@ type MessagingService struct {
 // interface compliance
 var _ domain.Messenger = (*MessagingService)(nil)
 
-// NewMessagingService
+// NewMessagingService return new messaging service class
 func NewMessagingService(c domain.Chain) *MessagingService {
 	return &MessagingService{
 		c: c,
 	}
 }
 
-// Create
-func (m *MessagingService) Create(ctx context.Context, newMessage *domain.NewMessage) (*domain.Message, error) {
+// Create transaction
+func (m *MessagingService) Create(newMessage *domain.NewMessage) (*domain.Message, error) {
 
 	tx := &domain.Tx{
 		Topic:   newMessage.Topic,
@@ -48,18 +47,26 @@ func (m *MessagingService) Create(ctx context.Context, newMessage *domain.NewMes
 	}, nil
 }
 
-// Read
-func (m *MessagingService) Read(ctx context.Context, UID uuid.UUID) (*domain.Message, error) {
+// Read transaction by hash
+func (m *MessagingService) Read(_ string) (*domain.Message, error) {
+	// TODO:
+	// implement logic
 	return nil, nil
 }
 
-// Acknowledge
-func (m *MessagingService) Acknowledge(ctx context.Context) error {
+// Acknowledge todo
+func (m *MessagingService) Acknowledge(_ context.Context) error {
+	// TODO:
+	// implement logic
 	return nil
 }
 
-// List
-func (m *MessagingService) List(ctx context.Context, limit, offset int) ([]*domain.Message, error) {
+// List messages by limit and offset
+func (m *MessagingService) List(_, _ int) ([]*domain.Message, error) {
+
+	// TODO:
+	// implement using limit and offset
+	// with blockchain iterator
 
 	block, err := m.c.GetBlock(nil)
 	if err != nil {
@@ -86,8 +93,12 @@ func (m *MessagingService) List(ctx context.Context, limit, offset int) ([]*doma
 	return messageSlice, nil
 }
 
-// ListByTopic
-func (m *MessagingService) ListByTopic(ctx context.Context, topic string, limit, offset int) ([]*domain.Message, error) {
+// ListByTopic retrieve messages by topic
+func (m *MessagingService) ListByTopic(topic string, _, _ int) ([]*domain.Message, error) {
+
+	// TODO:
+	// implement using limit and offset
+	// with blockchain iterator
 
 	block, err := m.c.GetBlock(nil)
 	if err != nil {
@@ -118,8 +129,12 @@ func (m *MessagingService) ListByTopic(ctx context.Context, topic string, limit,
 	return messageSlice, nil
 }
 
-// ListTopics
-func (m *MessagingService) ListTopics(ctx context.Context) ([]string, error) {
+// ListTopics retrieve all topics from chain
+func (m *MessagingService) ListTopics(_, _ int) ([]string, error) {
+
+	// TODO:
+	// implement using limit and offset
+	// with blockchain iterator
 
 	block, err := m.c.GetBlock(nil)
 	if err != nil {

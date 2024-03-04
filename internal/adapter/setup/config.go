@@ -1,3 +1,4 @@
+// Package setup service configuration
 package setup
 
 import (
@@ -6,13 +7,13 @@ import (
 	"github.com/sethvargo/go-envconfig"
 )
 
-// Config
+// Config service configuration
 type Config struct {
 	Server *Server
 	KV     *KV
 }
 
-// NewConfig
+// NewConfig return new config class
 func NewConfig() *Config {
 	return &Config{
 		Server: &Server{},
@@ -20,7 +21,7 @@ func NewConfig() *Config {
 	}
 }
 
-// ProcessConfigWithEnv
+// ProcessConfigWithEnv parse config from environment
 func ProcessConfigWithEnv(ctx context.Context, cfg *Config) error {
 	return envconfig.Process(ctx, cfg)
 }

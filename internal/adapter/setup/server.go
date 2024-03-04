@@ -1,7 +1,7 @@
 package setup
 
-// Server
+// Server configuration
 type Server struct {
-	HttpPort string `env:"SERVER_HTTP_PORT"`
-	GrpcPort int    `env:"SERVER_GRPC_PORT"`
+	HTTPPort string `env:"SERVER_HTTP_PORT"`
+	GRPCPort int    `env:"SERVER_GRPC_PORT"`
 }

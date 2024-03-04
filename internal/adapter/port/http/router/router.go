@@ -17,7 +17,7 @@ import (
 func NewRouter(logger *zap.Logger, cfg *setup.Config, m domain.Messenger) *fuego.Server {
 
 	s := fuego.NewServer(
-		fuego.WithPort(fmt.Sprintf(":%s", cfg.Server.HttpPort)),
+		fuego.WithPort(fmt.Sprintf(":%s", cfg.Server.HTTPPort)),
 		fuego.WithoutLogger(),
 	)
 

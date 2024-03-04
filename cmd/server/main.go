@@ -15,7 +15,6 @@ import (
 	"github.com/go-fuego/fuego"
 
 	"github.com/trevatk/block-broker/internal/adapter/logging"
-	"github.com/trevatk/block-broker/internal/adapter/port/http/controller"
 	"github.com/trevatk/block-broker/internal/adapter/port/http/router"
 	"github.com/trevatk/block-broker/internal/adapter/port/rpc"
 	"github.com/trevatk/block-broker/internal/adapter/setup"
@@ -35,7 +34,7 @@ func main() {
 		fx.Provide(fx.Annotate(chain.NewChain, fx.As(new(domain.Chain)))),
 		fx.Provide(fx.Annotate(application.NewMessagingService, fx.As(new(domain.Messenger)))),
 		fx.Provide(router.NewRouter, rpc.NewGRPCServer),
-		fx.Invoke(registerHooks, controller.InvokeMetricsHandler),
+		fx.Invoke(registerHooks),
 		fx.WithLogger(func(log *zap.Logger) fxevent.Logger {
 			return &fxevent.ZapLogger{Logger: log}
 		}),

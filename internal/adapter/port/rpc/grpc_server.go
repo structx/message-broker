@@ -1,3 +1,4 @@
+// Package rpc implementation of rpc using gRPC
 package rpc
 
 import (
@@ -19,7 +20,7 @@ import (
 	"github.com/trevatk/block-broker/internal/core/domain"
 )
 
-// GRPCServer
+// GRPCServer implementation of messaging service gRPC interface
 type GRPCServer struct {
 	// server interface compliance
 	pb.UnimplementedMessagingServiceServer
@@ -36,7 +37,7 @@ type GRPCServer struct {
 	s    *grpc.Server
 }
 
-// NewGRPCServer
+// NewGRPCServer return new gRPC server class
 func NewGRPCServer(logger *zap.Logger, cfg *setup.Config, messenger domain.Messenger) *GRPCServer {
 	return &GRPCServer{
 		log:       logger.Sugar().Named("grpc_server"),
@@ -44,12 +45,12 @@ func NewGRPCServer(logger *zap.Logger, cfg *setup.Config, messenger domain.Messe
 		mtx:       sync.Mutex{},
 		subs:      sync.Map{},
 		envelopes: sync.Map{},
-		port:      cfg.Server.GrpcPort,
+		port:      cfg.Server.GRPCPort,
 	}
 }
 
-// Publish
-func (g *GRPCServer) Publish(ctx context.Context, in *pb.Envelope) (*pb.Stub, error) {
+// Publish add message to chain and send message to subscribers
+func (g *GRPCServer) Publish(_ context.Context, in *pb.Envelope) (*pb.Stub, error) {
 
 	topic := in.GetTopic()
 	payload := in.GetPayload()
@@ -64,7 +65,7 @@ func (g *GRPCServer) Publish(ctx context.Context, in *pb.Envelope) (*pb.Stub, er
 	// 	return nil, status.Error(codes.InvalidArgument, "invalid metadata provided")
 	// }
 
-	msg, err := g.m.Create(ctx, &domain.NewMessage{
+	msg, err := g.m.Create(&domain.NewMessage{
 		Topic:     topic,
 		Payload:   payload,
 		Publisher: "test",
@@ -91,7 +92,7 @@ func (g *GRPCServer) Publish(ctx context.Context, in *pb.Envelope) (*pb.Stub, er
 	}, nil
 }
 
-// Subscribe
+// Subscribe store subscription in memory
 func (g *GRPCServer) Subscribe(in *pb.Subscription, stream pb.MessagingService_SubscribeServer) error {
 
 	ctx := stream.Context()
@@ -157,12 +158,14 @@ OUTER:
 	}
 }
 
-// RequestResponse
-func (g *GRPCServer) RequestResponse(ctx context.Context, in *pb.Envelope) (*pb.Envelope, error) {
+// RequestResponse message handler
+func (g *GRPCServer) RequestResponse(_ context.Context, _ *pb.Envelope) (*pb.Envelope, error) {
+	// TODO:
+	// implement handler
 	return nil, nil
 }
 
-// Start
+// Start gRPC server
 func (g *GRPCServer) Start() error {
 
 	g.s = grpc.NewServer()
@@ -182,13 +185,9 @@ func (g *GRPCServer) Start() error {
 	return nil
 }
 
-// Shutdown
+// Shutdown gRPC server
 func (g *GRPCServer) Shutdown() {
 	g.s.GracefulStop()
-}
-
-func removeSubscriber(subs []pb.MessagingService_SubscribeServer, index int) []pb.MessagingService_SubscribeServer {
-	return append(subs[:index], subs[index+1:]...)
 }
 
 func isValidTopic(topic string) error {

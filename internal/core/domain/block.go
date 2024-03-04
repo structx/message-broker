@@ -1,6 +1,7 @@
+// Package domain application entities and interfaces
 package domain
 
-// Block
+// Block chain level block model
 type Block struct {
 	Hash      string `json:"hash"`
 	PrevHash  string `json:"prev_hash"`
@@ -9,5 +10,3 @@ type Block struct {
 	Timestamp string `json:"timestamp"`
 	Txs       []*Tx  `json:"txs"`
 }
-
-func NewBlock() {}

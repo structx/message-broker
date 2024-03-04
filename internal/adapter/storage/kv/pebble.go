@@ -1,3 +1,4 @@
+// Package kv database implementation
 package kv
 
 import (
@@ -10,7 +11,7 @@ import (
 	"github.com/trevatk/block-broker/internal/core/domain"
 )
 
-// Pebble
+// Pebble db wrapper class
 type Pebble struct {
 	db *pdb.DB
 }
@@ -18,7 +19,7 @@ type Pebble struct {
 // interface compliance
 var _ domain.KV = (*Pebble)(nil)
 
-// NewPebble
+// NewPebble return new pebble db wrapper class
 func NewPebble(cfg *setup.Config) (*Pebble, error) {
 
 	opts := &pdb.Options{}
@@ -32,12 +33,12 @@ func NewPebble(cfg *setup.Config) (*Pebble, error) {
 	}, nil
 }
 
-// Put
+// Put set key/value pair
 func (p *Pebble) Put(key, value []byte) error {
 	return p.db.Set(key, value, pebble.Sync)
 }
 
-// Get
+// Get value by key
 func (p *Pebble) Get(key []byte) ([]byte, error) {
 
 	v, closer, err := p.db.Get(key)
@@ -55,7 +56,7 @@ func (p *Pebble) Get(key []byte) ([]byte, error) {
 	return v, nil
 }
 
-// Close
+// Close database connection
 func (p *Pebble) Close() error {
 	return p.db.Close()
 }

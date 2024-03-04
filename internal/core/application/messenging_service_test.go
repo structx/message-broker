@@ -1,7 +1,6 @@
 package application_test
 
 import (
-	"context"
 	"testing"
 	"time"
 
@@ -32,7 +31,6 @@ func (suite *MessagingServiceSuite) SetupTest() {
 func (suite *MessagingServiceSuite) TestCreate() {
 
 	assert := suite.Assert()
-	ctx := context.TODO()
 
 	testcases := []struct {
 		expected   error
@@ -50,7 +48,7 @@ func (suite *MessagingServiceSuite) TestCreate() {
 
 	for _, tt := range testcases {
 
-		msg, err := suite.m.Create(ctx, tt.newMessage)
+		msg, err := suite.m.Create(tt.newMessage)
 		assert.Equal(tt.expected, err)
 
 		assert.Equal(tt.newMessage.Topic, msg.Topic)

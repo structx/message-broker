@@ -1,20 +1,17 @@
 package domain
 
 import (
-	"context"
 	"time"
-
-	"github.com/google/uuid"
 )
 
-// NewMessage
+// NewMessage ...
 type NewMessage struct {
 	Topic     string
 	Payload   []byte
 	Publisher string
 }
 
-// Message
+// Message ...
 type Message struct {
 	ID        string
 	Topic     string
@@ -22,14 +19,18 @@ type Message struct {
 	CreatedAt time.Time
 }
 
-// Messenger
+// Messenger messaging service interface
 //
 //go:generate mockery --name Messenger
 type Messenger interface {
-	// Create
-	Create(ctx context.Context, newMessage *NewMessage) (*Message, error)
-	Read(ctx context.Context, UID uuid.UUID) (*Message, error)
-	List(ctx context.Context, limit, offset int) ([]*Message, error)
-	ListByTopic(ctx context.Context, topic string, limit, offset int) ([]*Message, error)
-	ListTopics(ctx context.Context) ([]string, error)
+	// Create message
+	Create(newMessage *NewMessage) (*Message, error)
+	// Read message by hash
+	Read(hash string) (*Message, error)
+	// List messages
+	List(limit, offset int) ([]*Message, error)
+	// ListByTopic messages by topic
+	ListByTopic(topic string, limit, offset int) ([]*Message, error)
+	// ListTopics retrieve message topics
+	ListTopics(limit, offset int) ([]string, error)
 }

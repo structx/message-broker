@@ -39,7 +39,7 @@ func (suite *GRPCServerSuite) SetupTest() {
 	assert.NoError(setup.ProcessConfigWithEnv(ctx, cfg))
 
 	mockMessenger := domain.NewMockMessenger(suite.T())
-	mockMessenger.EXPECT().Create(mock.Anything, mock.AnythingOfType("*domain.NewMessage")).Return(&domain.Message{}, nil).Maybe()
+	mockMessenger.EXPECT().Create(mock.AnythingOfType("*domain.NewMessage")).Return(&domain.Message{}, nil).Maybe()
 
 	suite.s = rpc.NewGRPCServer(logger, cfg, mockMessenger)
 }

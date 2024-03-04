@@ -1,3 +1,4 @@
+// Package chain blockchain logic
 package chain
 
 import (
@@ -13,7 +14,7 @@ import (
 	"github.com/trevatk/block-broker/internal/core/domain"
 )
 
-// Chain
+// Chain implementation of blockchain interface
 type Chain struct {
 	kv       domain.KV
 	lastHash string
@@ -22,7 +23,8 @@ type Chain struct {
 // interface compliance
 var _ domain.Chain = (*Chain)(nil)
 
-// NewChain
+// NewChain return new chain class
+// provides an existing chain or create new
 func NewChain(db domain.KV) (*Chain, error) {
 
 	v, err := db.Get([]byte("last_hash"))
@@ -64,7 +66,7 @@ func NewChain(db domain.KV) (*Chain, error) {
 	}, nil
 }
 
-// AddBlock
+// AddBlock insert block
 func (c *Chain) AddBlock(b *domain.Block) (string, error) {
 
 	b.PrevHash = c.lastHash
@@ -82,7 +84,7 @@ func (c *Chain) AddBlock(b *domain.Block) (string, error) {
 	return b.Hash, nil
 }
 
-// GetBlock
+// GetBlock read block by key
 func (c *Chain) GetBlock(key []byte) (*domain.Block, error) {
 
 	k := []byte(c.lastHash)
@@ -105,8 +107,13 @@ func (c *Chain) GetBlock(key []byte) (*domain.Block, error) {
 	return &b, nil
 }
 
-// InsertTx
+// InsertTx add transaction to chain
 func (c *Chain) InsertTx(tx *domain.Tx) (*domain.Tx, error) {
+
+	// TODO:
+	// add check for height of block >= max height
+	// if at max height
+	// 		create new block
 
 	blockbytes, err := c.kv.Get([]byte(c.lastHash))
 	if err != nil {

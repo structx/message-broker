@@ -6,7 +6,7 @@ import (
 	"golang.org/x/crypto/sha3"
 )
 
-// Tx
+// Tx blockchain level transaction model
 type Tx struct {
 	ID        []byte `json:"id"`
 	Topic     string `json:"topic"`
@@ -16,7 +16,7 @@ type Tx struct {
 	Sig       []byte `json:"sig"`
 }
 
-// SetID
+// SetID set transaction hash
 func (t *Tx) SetID() {
 	h := sha3.New224()
 	h.Write([]byte(fmt.Sprintf("%s:%s:%x", t.Topic, t.Pattern, t.Sig)))
