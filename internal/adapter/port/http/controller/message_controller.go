@@ -13,36 +13,36 @@ import (
 	"github.com/trevatk/block-broker/internal/core/domain"
 )
 
-// MessageController message controller class
-type MessageController struct {
+// Messages controller class
+type Messages struct {
 	log *zap.SugaredLogger
 	m   domain.Messenger
 }
 
 // interface compliance
-var _ Controller = (*MessageController)(nil)
+var _ Controller = (*Messages)(nil)
 
-// NewMessageController return new message controller
-func NewMessageController(logger *zap.Logger, messenger domain.Messenger) *MessageController {
-	return &MessageController{
+// NewMessages return new message controller
+func NewMessages(logger *zap.Logger, messenger domain.Messenger) *Messages {
+	return &Messages{
 		log: logger.Sugar().Named("message_controller"),
 		m:   messenger,
 	}
 }
 
 // RegisterRoutesV1 register routes on v1 router
-func (mc *MessageController) RegisterRoutesV1(s *fuego.Server) {
-	fuego.GetStd(s, "/api/v1/message/{id}", mc.Get).
+func (m *Messages) RegisterRoutesV1(s *fuego.Server) {
+	fuego.GetStd(s, "/api/v1/message/{hash}", m.Get).
 		Summary("Fetch message").
 		Description("Fetch message by hash").
 		AddTags("Messages").
 		OperationID("fetchMessage").
-		QueryParam("messageID", "message hash", fuego.OpenAPIParam{
+		QueryParam("hash", "message hash", fuego.OpenAPIParam{
 			Required: true,
 			Type:     "string",
-			Example:  "",
+			Example:  "0006fe63d8b226c08bb7ce6dc7e0f2beb6436bcb8531184c0656dbb1",
 		})
-	fuego.GetStd(s, "/api/v1/messages/topics", mc.ListTopics).
+	fuego.GetStd(s, "/api/v1/messages/topics", m.ListTopics).
 		Summary("List topics").
 		Description("List all topics").
 		AddTags("Topics").
@@ -63,16 +63,16 @@ type GetMessageResponse struct {
 }
 
 // Get fetch message by hash
-func (mc *MessageController) Get(w http.ResponseWriter, r *http.Request) {
+func (m *Messages) Get(w http.ResponseWriter, r *http.Request) {
 
 	url := r.URL.String()
 	urlslice := strings.Split(url, "/")
 
 	hash := urlslice[len(urlslice)-1]
 
-	msg, err := mc.m.Read(hash)
+	msg, err := m.m.Read(hash)
 	if err != nil {
-		mc.log.Errorf("failed to read message %v", err)
+		m.log.Errorf("failed to read message %v", err)
 		http.Error(w, "unable to read message", http.StatusInternalServerError)
 		return
 	}
@@ -89,7 +89,7 @@ func (mc *MessageController) Get(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusAccepted)
 	err = json.NewEncoder(w).Encode(response)
 	if err != nil {
-		mc.log.Errorf("failed to encode response %v", err)
+		m.log.Errorf("failed to encode response %v", err)
 		http.Error(w, "unable to encode response", http.StatusInternalServerError)
 	}
 }
@@ -100,11 +100,11 @@ type ListTopicsResponse struct {
 }
 
 // ListTopics fetch topics
-func (mc *MessageController) ListTopics(w http.ResponseWriter, _ *http.Request) {
+func (m *Messages) ListTopics(w http.ResponseWriter, _ *http.Request) {
 
-	topics, err := mc.m.ListTopics(0, 0)
+	topics, err := m.m.ListTopics(0, 0)
 	if err != nil {
-		mc.log.Errorf("m.ListTopics: %v", err)
+		m.log.Errorf("m.ListTopics: %v", err)
 		http.Error(w, "unable to list topics", http.StatusInternalServerError)
 		return
 
@@ -117,13 +117,13 @@ func (mc *MessageController) ListTopics(w http.ResponseWriter, _ *http.Request) 
 	w.WriteHeader(http.StatusAccepted)
 	err = json.NewEncoder(w).Encode(response)
 	if err != nil {
-		mc.log.Errorf("json.NewEncoder: %v", err)
+		m.log.Errorf("json.NewEncoder: %v", err)
 		http.Error(w, "unable to encode response", http.StatusInternalServerError)
 	}
 }
 
 // ListByTopic fetch messages by topic
-func (mc *MessageController) ListByTopic(_ http.ResponseWriter, _ *http.Request) {
+func (m *Messages) ListByTopic(_ http.ResponseWriter, _ *http.Request) {
 	// TODO:
 	// implement handler
 }

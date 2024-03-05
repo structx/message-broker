@@ -32,7 +32,7 @@ func (suite *MessageControllerSuite) SetupTest() {
 
 	s := fuego.NewServer()
 
-	c := controller.NewMessageController(logger, mockMessenger)
+	c := controller.NewMessages(logger, mockMessenger)
 	c.RegisterRoutesV1(s)
 
 	suite.mux = s.Mux

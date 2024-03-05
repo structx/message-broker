@@ -17,27 +17,27 @@ func (_m *MockChain) EXPECT() *MockChain_Expecter {
 	return &MockChain_Expecter{mock: &_m.Mock}
 }
 
-// AddBlock provides a mock function with given fields: b
-func (_m *MockChain) AddBlock(b *Block) (string, error) {
-	ret := _m.Called(b)
+// AddTx provides a mock function with given fields: data, action, payload, signature
+func (_m *MockChain) AddTx(data string, action string, payload []byte, signature string) (string, error) {
+	ret := _m.Called(data, action, payload, signature)
 
 	if len(ret) == 0 {
-		panic("no return value specified for AddBlock")
+		panic("no return value specified for AddTx")
 	}
 
 	var r0 string
 	var r1 error
-	if rf, ok := ret.Get(0).(func(*Block) (string, error)); ok {
-		return rf(b)
+	if rf, ok := ret.Get(0).(func(string, string, []byte, string) (string, error)); ok {
+		return rf(data, action, payload, signature)
 	}
-	if rf, ok := ret.Get(0).(func(*Block) string); ok {
-		r0 = rf(b)
+	if rf, ok := ret.Get(0).(func(string, string, []byte, string) string); ok {
+		r0 = rf(data, action, payload, signature)
 	} else {
 		r0 = ret.Get(0).(string)
 	}
 
-	if rf, ok := ret.Get(1).(func(*Block) error); ok {
-		r1 = rf(b)
+	if rf, ok := ret.Get(1).(func(string, string, []byte, string) error); ok {
+		r1 = rf(data, action, payload, signature)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -45,57 +45,60 @@ func (_m *MockChain) AddBlock(b *Block) (string, error) {
 	return r0, r1
 }
 
-// MockChain_AddBlock_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'AddBlock'
-type MockChain_AddBlock_Call struct {
+// MockChain_AddTx_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'AddTx'
+type MockChain_AddTx_Call struct {
 	*mock.Call
 }
 
-// AddBlock is a helper method to define mock.On call
-//   - b *Block
-func (_e *MockChain_Expecter) AddBlock(b interface{}) *MockChain_AddBlock_Call {
-	return &MockChain_AddBlock_Call{Call: _e.mock.On("AddBlock", b)}
+// AddTx is a helper method to define mock.On call
+//   - data string
+//   - action string
+//   - payload []byte
+//   - signature string
+func (_e *MockChain_Expecter) AddTx(data interface{}, action interface{}, payload interface{}, signature interface{}) *MockChain_AddTx_Call {
+	return &MockChain_AddTx_Call{Call: _e.mock.On("AddTx", data, action, payload, signature)}
 }
 
-func (_c *MockChain_AddBlock_Call) Run(run func(b *Block)) *MockChain_AddBlock_Call {
+func (_c *MockChain_AddTx_Call) Run(run func(data string, action string, payload []byte, signature string)) *MockChain_AddTx_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(*Block))
+		run(args[0].(string), args[1].(string), args[2].([]byte), args[3].(string))
 	})
 	return _c
 }
 
-func (_c *MockChain_AddBlock_Call) Return(_a0 string, _a1 error) *MockChain_AddBlock_Call {
+func (_c *MockChain_AddTx_Call) Return(_a0 string, _a1 error) *MockChain_AddTx_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *MockChain_AddBlock_Call) RunAndReturn(run func(*Block) (string, error)) *MockChain_AddBlock_Call {
+func (_c *MockChain_AddTx_Call) RunAndReturn(run func(string, string, []byte, string) (string, error)) *MockChain_AddTx_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
-// GetBlock provides a mock function with given fields: key
-func (_m *MockChain) GetBlock(key []byte) (*Block, error) {
-	ret := _m.Called(key)
+// ListTransactions provides a mock function with given fields: limit, offset
+func (_m *MockChain) ListTransactions(limit int, offset int) ([]*Tx, error) {
+	ret := _m.Called(limit, offset)
 
 	if len(ret) == 0 {
-		panic("no return value specified for GetBlock")
+		panic("no return value specified for ListTransactions")
 	}
 
-	var r0 *Block
+	var r0 []*Tx
 	var r1 error
-	if rf, ok := ret.Get(0).(func([]byte) (*Block, error)); ok {
-		return rf(key)
+	if rf, ok := ret.Get(0).(func(int, int) ([]*Tx, error)); ok {
+		return rf(limit, offset)
 	}
-	if rf, ok := ret.Get(0).(func([]byte) *Block); ok {
-		r0 = rf(key)
+	if rf, ok := ret.Get(0).(func(int, int) []*Tx); ok {
+		r0 = rf(limit, offset)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*Block)
+			r0 = ret.Get(0).([]*Tx)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func([]byte) error); ok {
-		r1 = rf(key)
+	if rf, ok := ret.Get(1).(func(int, int) error); ok {
+		r1 = rf(limit, offset)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -103,57 +106,58 @@ func (_m *MockChain) GetBlock(key []byte) (*Block, error) {
 	return r0, r1
 }
 
-// MockChain_GetBlock_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetBlock'
-type MockChain_GetBlock_Call struct {
+// MockChain_ListTransactions_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListTransactions'
+type MockChain_ListTransactions_Call struct {
 	*mock.Call
 }
 
-// GetBlock is a helper method to define mock.On call
-//   - key []byte
-func (_e *MockChain_Expecter) GetBlock(key interface{}) *MockChain_GetBlock_Call {
-	return &MockChain_GetBlock_Call{Call: _e.mock.On("GetBlock", key)}
+// ListTransactions is a helper method to define mock.On call
+//   - limit int
+//   - offset int
+func (_e *MockChain_Expecter) ListTransactions(limit interface{}, offset interface{}) *MockChain_ListTransactions_Call {
+	return &MockChain_ListTransactions_Call{Call: _e.mock.On("ListTransactions", limit, offset)}
 }
 
-func (_c *MockChain_GetBlock_Call) Run(run func(key []byte)) *MockChain_GetBlock_Call {
+func (_c *MockChain_ListTransactions_Call) Run(run func(limit int, offset int)) *MockChain_ListTransactions_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].([]byte))
+		run(args[0].(int), args[1].(int))
 	})
 	return _c
 }
 
-func (_c *MockChain_GetBlock_Call) Return(_a0 *Block, _a1 error) *MockChain_GetBlock_Call {
+func (_c *MockChain_ListTransactions_Call) Return(_a0 []*Tx, _a1 error) *MockChain_ListTransactions_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *MockChain_GetBlock_Call) RunAndReturn(run func([]byte) (*Block, error)) *MockChain_GetBlock_Call {
+func (_c *MockChain_ListTransactions_Call) RunAndReturn(run func(int, int) ([]*Tx, error)) *MockChain_ListTransactions_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
-// InsertTx provides a mock function with given fields: tx
-func (_m *MockChain) InsertTx(tx *Tx) (*Tx, error) {
-	ret := _m.Called(tx)
+// ListTransactionsByAction provides a mock function with given fields: input, limit, offset
+func (_m *MockChain) ListTransactionsByAction(input string, limit int, offset int) ([]*Tx, error) {
+	ret := _m.Called(input, limit, offset)
 
 	if len(ret) == 0 {
-		panic("no return value specified for InsertTx")
+		panic("no return value specified for ListTransactionsByAction")
 	}
 
-	var r0 *Tx
+	var r0 []*Tx
 	var r1 error
-	if rf, ok := ret.Get(0).(func(*Tx) (*Tx, error)); ok {
-		return rf(tx)
+	if rf, ok := ret.Get(0).(func(string, int, int) ([]*Tx, error)); ok {
+		return rf(input, limit, offset)
 	}
-	if rf, ok := ret.Get(0).(func(*Tx) *Tx); ok {
-		r0 = rf(tx)
+	if rf, ok := ret.Get(0).(func(string, int, int) []*Tx); ok {
+		r0 = rf(input, limit, offset)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*Tx)
+			r0 = ret.Get(0).([]*Tx)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(*Tx) error); ok {
-		r1 = rf(tx)
+	if rf, ok := ret.Get(1).(func(string, int, int) error); ok {
+		r1 = rf(input, limit, offset)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -161,30 +165,32 @@ func (_m *MockChain) InsertTx(tx *Tx) (*Tx, error) {
 	return r0, r1
 }
 
-// MockChain_InsertTx_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'InsertTx'
-type MockChain_InsertTx_Call struct {
+// MockChain_ListTransactionsByAction_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListTransactionsByAction'
+type MockChain_ListTransactionsByAction_Call struct {
 	*mock.Call
 }
 
-// InsertTx is a helper method to define mock.On call
-//   - tx *Tx
-func (_e *MockChain_Expecter) InsertTx(tx interface{}) *MockChain_InsertTx_Call {
-	return &MockChain_InsertTx_Call{Call: _e.mock.On("InsertTx", tx)}
+// ListTransactionsByAction is a helper method to define mock.On call
+//   - input string
+//   - limit int
+//   - offset int
+func (_e *MockChain_Expecter) ListTransactionsByAction(input interface{}, limit interface{}, offset interface{}) *MockChain_ListTransactionsByAction_Call {
+	return &MockChain_ListTransactionsByAction_Call{Call: _e.mock.On("ListTransactionsByAction", input, limit, offset)}
 }
 
-func (_c *MockChain_InsertTx_Call) Run(run func(tx *Tx)) *MockChain_InsertTx_Call {
+func (_c *MockChain_ListTransactionsByAction_Call) Run(run func(input string, limit int, offset int)) *MockChain_ListTransactionsByAction_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(*Tx))
+		run(args[0].(string), args[1].(int), args[2].(int))
 	})
 	return _c
 }
 
-func (_c *MockChain_InsertTx_Call) Return(_a0 *Tx, _a1 error) *MockChain_InsertTx_Call {
+func (_c *MockChain_ListTransactionsByAction_Call) Return(_a0 []*Tx, _a1 error) *MockChain_ListTransactionsByAction_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *MockChain_InsertTx_Call) RunAndReturn(run func(*Tx) (*Tx, error)) *MockChain_InsertTx_Call {
+func (_c *MockChain_ListTransactionsByAction_Call) RunAndReturn(run func(string, int, int) ([]*Tx, error)) *MockChain_ListTransactionsByAction_Call {
 	_c.Call.Return(run)
 	return _c
 }

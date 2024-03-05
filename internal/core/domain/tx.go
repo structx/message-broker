@@ -2,6 +2,7 @@ package domain
 
 import (
 	"fmt"
+	"time"
 
 	"golang.org/x/crypto/sha3"
 )
@@ -10,15 +11,26 @@ import (
 type Tx struct {
 	ID        []byte `json:"id"`
 	Topic     string `json:"topic"`
-	Pattern   string `json:"pattern"`
+	Action    string `json:"pattern"`
 	Payload   []byte `json:"payload"`
 	Timestamp string `json:"timestamp"`
-	Sig       []byte `json:"sig"`
+	Sig       string `json:"sig"`
+}
+
+// NewTx return new transaction
+func NewTx(data, action string, payload []byte, signature string) *Tx {
+	return &Tx{
+		Topic:     data,
+		Action:    action,
+		Payload:   payload,
+		Timestamp: time.Now().String(),
+		Sig:       signature,
+	}
 }
 
 // SetID set transaction hash
 func (t *Tx) SetID() {
 	h := sha3.New224()
-	h.Write([]byte(fmt.Sprintf("%s:%s:%x", t.Topic, t.Pattern, t.Sig)))
+	h.Write([]byte(fmt.Sprintf("%s:%s:%x", t.Topic, t.Action, t.Sig)))
 	t.ID = h.Sum(nil)
 }
