@@ -1,39 +1,33 @@
 package controller
 
 import (
-	"encoding/json"
 	"net/http"
 
-	"github.com/go-fuego/fuego"
+	"github.com/labstack/echo/v4"
 	"go.uber.org/zap"
 )
 
-// HealthController health check controller
-type HealthController struct {
+// Health health check controller
+type Health struct {
 	log *zap.SugaredLogger
 }
 
 // interface compliance
-var _ ServiceController = (*HealthController)(nil)
+var _ ServiceController = (*Health)(nil)
 
 // NewHealthController return new health controller
-func NewHealthController(logger *zap.Logger) *HealthController {
-	return &HealthController{
+func NewHealth(logger *zap.Logger) *Health {
+	return &Health{
 		log: logger.Sugar().Named("health_controller"),
 	}
 }
 
 // RegisterRoutesV0 register routes on root handler
-func (hc *HealthController) RegisterRoutesV0(s *fuego.Server) {
-	fuego.GetStd(s, "/health", hc.Healthz)
+func (h *Health) RegisterRoutesV0(e *echo.Echo) {
+	e.GET("/health", h.health)
 }
 
 // Healthz service health check endpoint
-func (hc *HealthController) Healthz(w http.ResponseWriter, _ *http.Request) {
-	w.WriteHeader(http.StatusOK)
-	err := json.NewEncoder(w).Encode("OK")
-	if err != nil {
-		hc.log.Errorf("failed to encode response %v", err)
-		http.Error(w, "unable to encode response", http.StatusInternalServerError)
-	}
+func (h *Health) health(c echo.Context) error {
+	return c.String(http.StatusOK, "OK")
 }

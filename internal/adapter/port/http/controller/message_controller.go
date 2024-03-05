@@ -1,12 +1,11 @@
 package controller
 
 import (
-	"encoding/json"
 	"net/http"
-	"strings"
+	"strconv"
 	"time"
 
-	"github.com/go-fuego/fuego"
+	"github.com/labstack/echo/v4"
 
 	"go.uber.org/zap"
 
@@ -31,22 +30,9 @@ func NewMessages(logger *zap.Logger, messenger domain.Messenger) *Messages {
 }
 
 // RegisterRoutesV1 register routes on v1 router
-func (m *Messages) RegisterRoutesV1(s *fuego.Server) {
-	fuego.GetStd(s, "/api/v1/message/{hash}", m.Get).
-		Summary("Fetch message").
-		Description("Fetch message by hash").
-		AddTags("Messages").
-		OperationID("fetchMessage").
-		QueryParam("hash", "message hash", fuego.OpenAPIParam{
-			Required: true,
-			Type:     "string",
-			Example:  "0006fe63d8b226c08bb7ce6dc7e0f2beb6436bcb8531184c0656dbb1",
-		})
-	fuego.GetStd(s, "/api/v1/messages/topics", m.ListTopics).
-		Summary("List topics").
-		Description("List all topics").
-		AddTags("Topics").
-		OperationID("listTopics")
+func (m *Messages) RegisterRoutesV1(g *echo.Group) {
+	g.GET("/message/:hash", m.fetchMessage)
+	g.GET("/message/topics", m.listTopics)
 }
 
 // MessagePayload http message model
@@ -63,18 +49,14 @@ type GetMessageResponse struct {
 }
 
 // Get fetch message by hash
-func (m *Messages) Get(w http.ResponseWriter, r *http.Request) {
+func (m *Messages) fetchMessage(c echo.Context) error {
 
-	url := r.URL.String()
-	urlslice := strings.Split(url, "/")
+	h := c.Param("hash")
 
-	hash := urlslice[len(urlslice)-1]
-
-	msg, err := m.m.Read(hash)
+	msg, err := m.m.Read(h)
 	if err != nil {
 		m.log.Errorf("failed to read message %v", err)
-		http.Error(w, "unable to read message", http.StatusInternalServerError)
-		return
+		return c.String(http.StatusInternalServerError, "unable to read message")
 	}
 
 	response := &GetMessageResponse{
@@ -86,12 +68,7 @@ func (m *Messages) Get(w http.ResponseWriter, r *http.Request) {
 		},
 	}
 
-	w.WriteHeader(http.StatusAccepted)
-	err = json.NewEncoder(w).Encode(response)
-	if err != nil {
-		m.log.Errorf("failed to encode response %v", err)
-		http.Error(w, "unable to encode response", http.StatusInternalServerError)
-	}
+	return c.JSON(http.StatusAccepted, response)
 }
 
 // ListTopicsResponse http list topics response model
@@ -100,26 +77,31 @@ type ListTopicsResponse struct {
 }
 
 // ListTopics fetch topics
-func (m *Messages) ListTopics(w http.ResponseWriter, _ *http.Request) {
+func (m *Messages) listTopics(c echo.Context) error {
 
-	topics, err := m.m.ListTopics(0, 0)
+	l := c.QueryParam("limit")
+	o := c.QueryParam("offset")
+
+	l64, err := strconv.ParseInt(l, 10, 64)
 	if err != nil {
-		m.log.Errorf("m.ListTopics: %v", err)
-		http.Error(w, "unable to list topics", http.StatusInternalServerError)
-		return
+		return c.String(http.StatusBadRequest, "invalid limit query parameter")
+	}
 
+	o64, err := strconv.ParseInt(o, 10, 64)
+	if err != nil {
+		return c.String(http.StatusBadRequest, "invalid offset query parameter")
+	}
+
+	topics, err := m.m.ListTopics(int(l64), int(o64))
+	if err != nil {
+		return c.String(http.StatusInternalServerError, "failed to list topics")
 	}
 
 	response := &ListTopicsResponse{
 		Topics: topics,
 	}
 
-	w.WriteHeader(http.StatusAccepted)
-	err = json.NewEncoder(w).Encode(response)
-	if err != nil {
-		m.log.Errorf("json.NewEncoder: %v", err)
-		http.Error(w, "unable to encode response", http.StatusInternalServerError)
-	}
+	return c.JSON(http.StatusAccepted, response)
 }
 
 // ListByTopic fetch messages by topic

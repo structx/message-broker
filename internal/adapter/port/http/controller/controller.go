@@ -2,15 +2,15 @@
 package controller
 
 import (
-	"github.com/go-fuego/fuego"
+	"github.com/labstack/echo/v4"
 )
 
 // Controller exposed http controller on service handlers
 type Controller interface {
-	RegisterRoutesV1(s *fuego.Server)
+	RegisterRoutesV1(g *echo.Group)
 }
 
 // ServiceController exposed http controller on root handler
 type ServiceController interface {
-	RegisterRoutesV0(s *fuego.Server)
+	RegisterRoutesV0(g *echo.Echo)
 }
