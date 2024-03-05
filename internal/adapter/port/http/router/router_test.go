@@ -31,7 +31,7 @@ func Test_NewRouter(t *testing.T) {
 
 		mockMessenger := domain.NewMockMessenger(t)
 
-		s := router.NewRouter(logger, cfg, mockMessenger)
+		s := router.NewRouter(logger, mockMessenger)
 		assert.NotNil(s)
 	})
 }

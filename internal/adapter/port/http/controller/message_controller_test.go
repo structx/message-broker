@@ -29,7 +29,7 @@ func (suite *MessageControllerSuite) SetupTest() {
 	mockMessenger := domain.NewMockMessenger(suite.T())
 	mockMessenger.On("Read", mock.Anything, mock.AnythingOfType("uuid.UUID")).Return(&domain.Message{}, nil).Once()
 
-	suite.handler = router.NewRouter(logger, nil, mockMessenger)
+	suite.handler = router.NewRouter(logger, mockMessenger)
 }
 
 func (suite *MessageControllerSuite) TestGet() {

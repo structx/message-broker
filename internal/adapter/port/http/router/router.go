@@ -7,22 +7,20 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"github.com/trevatk/block-broker/internal/adapter/port/http/controller"
-	"github.com/trevatk/block-broker/internal/adapter/setup"
 	"github.com/trevatk/block-broker/internal/core/domain"
 )
 
 // NewRouter return new fuego server
-func NewRouter(logger *zap.Logger, cfg *setup.Config, m domain.Messenger) *echo.Echo {
+func NewRouter(logger *zap.Logger, m domain.Messenger) *echo.Echo {
 
 	e := echo.New()
 
 	controllers := []interface{}{
 		controller.NewMessages(logger, m),
-		controller.NewHealthController(logger),
+		controller.NewHealth(logger),
 	}
 
-	g := e.Group("/")
-	api := g.Group("/api")
+	api := e.Group("/api")
 	v1 := api.Group("/v1")
 
 	for _, c := range controllers {
@@ -32,7 +30,7 @@ func NewRouter(logger *zap.Logger, cfg *setup.Config, m domain.Messenger) *echo.
 		}
 
 		if v, ok := c.(controller.ServiceController); ok {
-			v.RegisterRoutesV0(g)
+			v.RegisterRoutesV0(e)
 		}
 	}
 

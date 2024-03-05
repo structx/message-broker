@@ -12,5 +12,5 @@ type Controller interface {
 
 // ServiceController exposed http controller on root handler
 type ServiceController interface {
-	RegisterRoutesV0(g *echo.Group)
+	RegisterRoutesV0(g *echo.Echo)
 }
