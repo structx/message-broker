@@ -4,6 +4,16 @@ import (
 	"time"
 )
 
+// PayloadAction domain actions
+type PayloadAction string
+
+const (
+	// Publish message
+	Publish PayloadAction = "publish"
+	// Subscribe to topic
+	Subscribe PayloadAction = "subscribe"
+)
+
 // NewMessage ...
 type NewMessage struct {
 	Topic     string

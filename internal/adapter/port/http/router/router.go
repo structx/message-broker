@@ -22,7 +22,7 @@ func NewRouter(logger *zap.Logger, cfg *setup.Config, m domain.Messenger) *fuego
 	)
 
 	controllers := []interface{}{
-		controller.NewMessageController(logger, m),
+		controller.NewMessages(logger, m),
 		controller.NewHealthController(logger),
 	}
 

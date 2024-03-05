@@ -28,22 +28,17 @@ func NewMessagingService(c domain.Chain) *MessagingService {
 // Create transaction
 func (m *MessagingService) Create(newMessage *domain.NewMessage) (*domain.Message, error) {
 
-	tx := &domain.Tx{
-		Topic:   newMessage.Topic,
-		Payload: newMessage.Payload,
-		Sig:     []byte(newMessage.Publisher),
-	}
-	tx.SetID()
-
-	tx, err := m.c.InsertTx(tx)
+	action := string(domain.Publish)
+	hash, err := m.c.AddTx(newMessage.Topic, action, newMessage.Payload, newMessage.Publisher)
 	if err != nil {
-		return nil, fmt.Errorf("failed to insert transaction %v", err)
+		return nil, fmt.Errorf("failed to add tranaction %v", err)
 	}
 
 	return &domain.Message{
-		ID:      hex.EncodeToString(tx.ID),
-		Topic:   tx.Topic,
-		Payload: tx.Payload,
+		ID:        hash,
+		Topic:     newMessage.Topic,
+		Payload:   newMessage.Payload,
+		CreatedAt: time.Now(),
 	}, nil
 }
 
@@ -62,88 +57,72 @@ func (m *MessagingService) Acknowledge(_ context.Context) error {
 }
 
 // List messages by limit and offset
-func (m *MessagingService) List(_, _ int) ([]*domain.Message, error) {
+func (m *MessagingService) List(limit, offset int) ([]*domain.Message, error) {
 
-	// TODO:
-	// implement using limit and offset
-	// with blockchain iterator
-
-	block, err := m.c.GetBlock(nil)
+	txslice, err := m.c.ListTransactions(limit, offset)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get first block %v", err)
+		return nil, fmt.Errorf("failed to list transactions by action %v", err)
 	}
 
-	messageSlice := make([]*domain.Message, 0)
+	messageslice := make([]*domain.Message, 0, limit)
 
-	for _, tx := range block.Txs {
+	for _, tx := range txslice {
 
-		createdAt, err := time.Parse(time.RFC3339, tx.Timestamp)
+		timestamp, err := time.Parse(time.RFC3339, tx.Timestamp)
 		if err != nil {
-			return nil, fmt.Errorf("failed to parse transaction timestamp %v", err)
+			return nil, fmt.Errorf("failed to parse tx timestamp %v", err)
 		}
 
-		messageSlice = append(messageSlice, &domain.Message{
-			ID:        string(tx.Payload),
+		messageslice = append(messageslice, &domain.Message{
+			ID:        hex.EncodeToString(tx.ID),
 			Topic:     tx.Topic,
 			Payload:   tx.Payload,
-			CreatedAt: createdAt,
+			CreatedAt: timestamp,
 		})
 	}
 
-	return messageSlice, nil
+	return messageslice, nil
 }
 
 // ListByTopic retrieve messages by topic
-func (m *MessagingService) ListByTopic(topic string, _, _ int) ([]*domain.Message, error) {
+func (m *MessagingService) ListByTopic(topic string, limit, offset int) ([]*domain.Message, error) {
 
-	// TODO:
-	// implement using limit and offset
-	// with blockchain iterator
-
-	block, err := m.c.GetBlock(nil)
+	txslice, err := m.c.ListTransactionsByAction(topic, limit, offset)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get first block %v", err)
+		return nil, fmt.Errorf("failed to list transactions by action %v", err)
 	}
 
-	messageSlice := make([]*domain.Message, 0)
+	messageslice := make([]*domain.Message, 0, limit)
 
-	for _, tx := range block.Txs {
+	for _, tx := range txslice {
 
-		if tx.Topic != topic {
-			continue
-		}
-
-		createdAt, err := time.Parse(time.RFC3339, tx.Timestamp)
+		timestamp, err := time.Parse(time.RFC3339, tx.Timestamp)
 		if err != nil {
-			return nil, fmt.Errorf("failed to parse transaction timestamp %v", err)
+			return nil, fmt.Errorf("failed to parse tx timestamp %v", err)
 		}
 
-		messageSlice = append(messageSlice, &domain.Message{
-			ID:        string(tx.Payload),
+		messageslice = append(messageslice, &domain.Message{
+			ID:        hex.EncodeToString(tx.ID),
 			Topic:     tx.Topic,
 			Payload:   tx.Payload,
-			CreatedAt: createdAt,
+			CreatedAt: timestamp,
 		})
 	}
 
-	return messageSlice, nil
+	return messageslice, nil
 }
 
 // ListTopics retrieve all topics from chain
-func (m *MessagingService) ListTopics(_, _ int) ([]string, error) {
+func (m *MessagingService) ListTopics(limit, offset int) ([]string, error) {
 
-	// TODO:
-	// implement using limit and offset
-	// with blockchain iterator
-
-	block, err := m.c.GetBlock(nil)
+	txslice, err := m.c.ListTransactions(limit, offset)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get first block %v", err)
+		return nil, fmt.Errorf("failed to list transactions %v", err)
 	}
 
-	topicSlice := make([]string, 0)
+	topicSlice := make([]string, 0, limit)
 
-	for _, tx := range block.Txs {
+	for _, tx := range txslice {
 		topicSlice = append(topicSlice, tx.Topic)
 	}
 
