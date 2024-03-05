@@ -65,7 +65,7 @@ func NewChain(db domain.KV) (*Chain, error) {
 	}, nil
 }
 
-// AddTransaction
+// AddTx insert new transaction
 func (c *Chain) AddTx(data, action string, payload []byte, signature string) (string, error) {
 
 	// create new transactions
@@ -106,7 +106,7 @@ func (c *Chain) AddTx(data, action string, payload []byte, signature string) (st
 	return hex.EncodeToString(tx.ID), nil
 }
 
-// ListTransactions
+// ListTransactions with limit and offset
 func (c *Chain) ListTransactions(limit, offset int) ([]*domain.Tx, error) {
 
 	it := newIterator(c.kv, c.lastHash)
@@ -149,7 +149,7 @@ OUTER:
 	return txSlice, nil
 }
 
-// ListTransactionByAction read all transactions with matching actions
+// ListTransactionsByAction read all transactions with matching actions
 func (c *Chain) ListTransactionsByAction(input string, limit, offset int) ([]*domain.Tx, error) {
 
 	it := newIterator(c.kv, c.lastHash)
