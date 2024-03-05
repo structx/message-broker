@@ -2,11 +2,9 @@
 package router
 
 import (
-	"fmt"
-
 	"go.uber.org/zap"
 
-	"github.com/go-fuego/fuego"
+	"github.com/labstack/echo/v4"
 
 	"github.com/trevatk/block-broker/internal/adapter/port/http/controller"
 	"github.com/trevatk/block-broker/internal/adapter/setup"
@@ -14,28 +12,29 @@ import (
 )
 
 // NewRouter return new fuego server
-func NewRouter(logger *zap.Logger, cfg *setup.Config, m domain.Messenger) *fuego.Server {
+func NewRouter(logger *zap.Logger, cfg *setup.Config, m domain.Messenger) *echo.Echo {
 
-	s := fuego.NewServer(
-		fuego.WithPort(fmt.Sprintf(":%s", cfg.Server.HTTPPort)),
-		fuego.WithoutLogger(),
-	)
+	e := echo.New()
 
 	controllers := []interface{}{
 		controller.NewMessages(logger, m),
 		controller.NewHealthController(logger),
 	}
 
+	g := e.Group("/")
+	api := g.Group("/api")
+	v1 := api.Group("/v1")
+
 	for _, c := range controllers {
 
 		if v, ok := c.(controller.Controller); ok {
-			v.RegisterRoutesV1(s)
+			v.RegisterRoutesV1(v1)
 		}
 
 		if v, ok := c.(controller.ServiceController); ok {
-			v.RegisterRoutesV0(s)
+			v.RegisterRoutesV0(g)
 		}
 	}
 
-	return s
+	return e
 }

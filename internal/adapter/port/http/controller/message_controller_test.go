@@ -6,18 +6,17 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/go-fuego/fuego"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 
 	"github.com/trevatk/block-broker/internal/adapter/logging"
-	"github.com/trevatk/block-broker/internal/adapter/port/http/controller"
+	"github.com/trevatk/block-broker/internal/adapter/port/http/router"
 	"github.com/trevatk/block-broker/internal/core/domain"
 )
 
 type MessageControllerSuite struct {
 	suite.Suite
-	mux *http.ServeMux
+	handler http.Handler
 }
 
 func (suite *MessageControllerSuite) SetupTest() {
@@ -30,12 +29,7 @@ func (suite *MessageControllerSuite) SetupTest() {
 	mockMessenger := domain.NewMockMessenger(suite.T())
 	mockMessenger.On("Read", mock.Anything, mock.AnythingOfType("uuid.UUID")).Return(&domain.Message{}, nil).Once()
 
-	s := fuego.NewServer()
-
-	c := controller.NewMessages(logger, mockMessenger)
-	c.RegisterRoutesV1(s)
-
-	suite.mux = s.Mux
+	suite.handler = router.NewRouter(logger, nil, mockMessenger)
 }
 
 func (suite *MessageControllerSuite) TestGet() {
@@ -63,7 +57,7 @@ func (suite *MessageControllerSuite) TestGet() {
 		request, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/api/v1/message/%s", tt.uid), nil)
 		assert.NoError(err)
 
-		suite.mux.ServeHTTP(rr, request)
+		suite.handler.ServeHTTP(rr, request)
 
 		assert.Equal(tt.expected, rr.Code)
 	}

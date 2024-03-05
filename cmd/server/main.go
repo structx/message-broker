@@ -12,10 +12,9 @@ import (
 	"go.uber.org/multierr"
 	"go.uber.org/zap"
 
-	"github.com/go-fuego/fuego"
-
 	"github.com/trevatk/block-broker/internal/adapter/logging"
 	"github.com/trevatk/block-broker/internal/adapter/port/http/router"
+	"github.com/trevatk/block-broker/internal/adapter/port/http/server"
 	"github.com/trevatk/block-broker/internal/adapter/port/rpc"
 	"github.com/trevatk/block-broker/internal/adapter/setup"
 	"github.com/trevatk/block-broker/internal/adapter/storage/kv"
@@ -33,7 +32,9 @@ func main() {
 		fx.Provide(fx.Annotate(kv.NewPebble, fx.As(new(domain.KV)))),
 		fx.Provide(fx.Annotate(chain.NewChain, fx.As(new(domain.Chain)))),
 		fx.Provide(fx.Annotate(application.NewMessagingService, fx.As(new(domain.Messenger)))),
-		fx.Provide(router.NewRouter, rpc.NewGRPCServer),
+		fx.Provide(fx.Annotate(router.NewRouter, fx.As(new(http.Handler)))),
+		fx.Provide(rpc.NewGRPCServer),
+		fx.Provide(server.NewHTTPServer),
 		fx.Invoke(registerHooks),
 		fx.WithLogger(func(log *zap.Logger) fxevent.Logger {
 			return &fxevent.ZapLogger{Logger: log}
@@ -41,14 +42,14 @@ func main() {
 	).Run()
 }
 
-func registerHooks(lc fx.Lifecycle, s *fuego.Server, s2 *rpc.GRPCServer, kv domain.KV) error {
+func registerHooks(lc fx.Lifecycle, s1 *http.Server, s2 *rpc.GRPCServer, kv domain.KV) error {
 	lc.Append(
 		fx.Hook{
 			OnStart: func(_ context.Context) error {
 
 				// start http server
 				go func() {
-					if err := s.Run(); err != nil && err != http.ErrServerClosed {
+					if err := s1.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 						log.Fatalf("failed to start http server %v", err)
 					}
 				}()
@@ -66,7 +67,7 @@ func registerHooks(lc fx.Lifecycle, s *fuego.Server, s2 *rpc.GRPCServer, kv doma
 				var result error
 
 				// shutdown http server
-				err := s.Server.Shutdown(ctx)
+				err := s1.Shutdown(ctx)
 				if err != nil {
 					result = multierr.Append(result, fmt.Errorf("failed to shutdown http server %v", err))
 				}
