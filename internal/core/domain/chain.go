@@ -4,8 +4,10 @@ package domain
 //
 //go:generate mockery --name Chain
 type Chain interface {
-	// AddTransaction
+	// AddTx add new transaction
 	AddTx(data, action string, payload []byte, signature string) (string, error)
+	// ReadTx read transaction by id hash
+	ReadTx(hash string) (*Tx, error)
 	// ListTransactions
 	ListTransactions(limit, offset int) ([]*Tx, error)
 	// ListTransactionsByAction

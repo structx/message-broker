@@ -3,6 +3,7 @@ package application_test
 import (
 	"testing"
 
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 
 	"github.com/trevatk/block-broker/internal/core/application"
@@ -17,6 +18,7 @@ type MessagingServiceSuite struct {
 func (suite *MessagingServiceSuite) SetupTest() {
 
 	mockChain := domain.NewMockChain(suite.T())
+	mockChain.EXPECT().AddTx(mock.AnythingOfType("string"), mock.AnythingOfType("string"), mock.AnythingOfType("[]byte"), mock.AnythingOfType("string")).Return("", nil).Once()
 
 	suite.m = application.NewMessagingService(mockChain)
 }
@@ -34,7 +36,7 @@ func (suite *MessagingServiceSuite) TestCreate() {
 			newMessage: &domain.NewMessage{
 				Topic:     "unit.test",
 				Payload:   []byte("hello world"),
-				Publisher: "golang",
+				Signature: "golang",
 			},
 		},
 	}

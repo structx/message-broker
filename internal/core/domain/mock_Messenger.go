@@ -135,23 +135,23 @@ func (_c *MockMessenger_List_Call) RunAndReturn(run func(int, int) ([]*Message, 
 }
 
 // ListByTopic provides a mock function with given fields: topic, limit, offset
-func (_m *MockMessenger) ListByTopic(topic string, limit int, offset int) ([]*Message, error) {
+func (_m *MockMessenger) ListByTopic(topic string, limit int, offset int) ([]*PartialMessage, error) {
 	ret := _m.Called(topic, limit, offset)
 
 	if len(ret) == 0 {
 		panic("no return value specified for ListByTopic")
 	}
 
-	var r0 []*Message
+	var r0 []*PartialMessage
 	var r1 error
-	if rf, ok := ret.Get(0).(func(string, int, int) ([]*Message, error)); ok {
+	if rf, ok := ret.Get(0).(func(string, int, int) ([]*PartialMessage, error)); ok {
 		return rf(topic, limit, offset)
 	}
-	if rf, ok := ret.Get(0).(func(string, int, int) []*Message); ok {
+	if rf, ok := ret.Get(0).(func(string, int, int) []*PartialMessage); ok {
 		r0 = rf(topic, limit, offset)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*Message)
+			r0 = ret.Get(0).([]*PartialMessage)
 		}
 	}
 
@@ -184,12 +184,12 @@ func (_c *MockMessenger_ListByTopic_Call) Run(run func(topic string, limit int, 
 	return _c
 }
 
-func (_c *MockMessenger_ListByTopic_Call) Return(_a0 []*Message, _a1 error) *MockMessenger_ListByTopic_Call {
+func (_c *MockMessenger_ListByTopic_Call) Return(_a0 []*PartialMessage, _a1 error) *MockMessenger_ListByTopic_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *MockMessenger_ListByTopic_Call) RunAndReturn(run func(string, int, int) ([]*Message, error)) *MockMessenger_ListByTopic_Call {
+func (_c *MockMessenger_ListByTopic_Call) RunAndReturn(run func(string, int, int) ([]*PartialMessage, error)) *MockMessenger_ListByTopic_Call {
 	_c.Call.Return(run)
 	return _c
 }

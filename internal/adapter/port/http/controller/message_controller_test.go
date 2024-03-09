@@ -27,26 +27,26 @@ func (suite *MessageControllerSuite) SetupTest() {
 	assert.NoError(err)
 
 	mockMessenger := domain.NewMockMessenger(suite.T())
-	mockMessenger.On("Read", mock.Anything, mock.AnythingOfType("uuid.UUID")).Return(&domain.Message{}, nil).Once()
+	mockMessenger.EXPECT().Read(mock.Anything).Return(&domain.Message{}, nil).Once()
 
 	suite.handler = router.NewRouter(logger, mockMessenger)
 }
 
-func (suite *MessageControllerSuite) TestGet() {
+func (suite *MessageControllerSuite) TestFetchMessage() {
 
 	assert := suite.Assert()
 
 	testcases := []struct {
-		uid      string
+		hash     string
 		expected int
 	}{
 		{
-			uid:      "322befbd-ed13-4566-93e7-24fe87e5306f",
+			hash:     "0cf6b052518a08ed5299676530c3d57f2c94dbe9ec26184b4b9d3baf",
 			expected: http.StatusAccepted,
 		},
 		{
-			uid:      "12",
-			expected: http.StatusBadRequest,
+			hash:     "",
+			expected: http.StatusNotFound,
 		},
 	}
 
@@ -54,7 +54,8 @@ func (suite *MessageControllerSuite) TestGet() {
 
 		rr := httptest.NewRecorder()
 
-		request, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/api/v1/message/%s", tt.uid), nil)
+		endpoint := fmt.Sprintf("/api/v1/messages/%s", tt.hash)
+		request, err := http.NewRequest(http.MethodGet, endpoint, nil)
 		assert.NoError(err)
 
 		suite.handler.ServeHTTP(rr, request)

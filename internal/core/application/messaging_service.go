@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/trevatk/block-broker/internal/core/chain"
 	"github.com/trevatk/block-broker/internal/core/domain"
 )
 
@@ -25,28 +26,44 @@ func NewMessagingService(c domain.Chain) *MessagingService {
 	}
 }
 
-// Create transaction
+// Create message
 func (m *MessagingService) Create(newMessage *domain.NewMessage) (*domain.Message, error) {
 
 	action := string(domain.Publish)
-	hash, err := m.c.AddTx(newMessage.Topic, action, newMessage.Payload, newMessage.Publisher)
+	hash, err := m.c.AddTx(newMessage.Topic, action, newMessage.Payload, newMessage.Signature)
 	if err != nil {
 		return nil, fmt.Errorf("failed to add tranaction %v", err)
 	}
 
 	return &domain.Message{
-		ID:        hash,
+		Hash:      hash,
 		Topic:     newMessage.Topic,
 		Payload:   newMessage.Payload,
 		CreatedAt: time.Now(),
 	}, nil
 }
 
-// Read transaction by hash
-func (m *MessagingService) Read(_ string) (*domain.Message, error) {
-	// TODO:
-	// implement logic
-	return nil, nil
+// Read Message by hash
+func (m *MessagingService) Read(hash string) (*domain.Message, error) {
+
+	tx, err := m.c.ReadTx(hash)
+	if err != nil && err == chain.ErrNotFound {
+		return nil, ErrNotFound
+	} else if err != nil {
+		return nil, fmt.Errorf("failed to read chain tx %v", err)
+	}
+
+	timestamp, err := time.Parse(time.RFC3339, tx.Timestamp)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse timestamp %v", err)
+	}
+
+	return &domain.Message{
+		Hash:      hex.EncodeToString(tx.ID),
+		Topic:     tx.Topic,
+		Payload:   tx.Payload,
+		CreatedAt: timestamp,
+	}, nil
 }
 
 // Acknowledge todo
@@ -74,7 +91,7 @@ func (m *MessagingService) List(limit, offset int) ([]*domain.Message, error) {
 		}
 
 		messageslice = append(messageslice, &domain.Message{
-			ID:        hex.EncodeToString(tx.ID),
+			Hash:      hex.EncodeToString(tx.ID),
 			Topic:     tx.Topic,
 			Payload:   tx.Payload,
 			CreatedAt: timestamp,
@@ -85,27 +102,19 @@ func (m *MessagingService) List(limit, offset int) ([]*domain.Message, error) {
 }
 
 // ListByTopic retrieve messages by topic
-func (m *MessagingService) ListByTopic(topic string, limit, offset int) ([]*domain.Message, error) {
+func (m *MessagingService) ListByTopic(topic string, limit, offset int) ([]*domain.PartialMessage, error) {
 
 	txslice, err := m.c.ListTransactionsByAction(topic, limit, offset)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list transactions by action %v", err)
 	}
 
-	messageslice := make([]*domain.Message, 0, limit)
+	messageslice := make([]*domain.PartialMessage, 0, limit)
 
 	for _, tx := range txslice {
-
-		timestamp, err := time.Parse(time.RFC3339, tx.Timestamp)
-		if err != nil {
-			return nil, fmt.Errorf("failed to parse tx timestamp %v", err)
-		}
-
-		messageslice = append(messageslice, &domain.Message{
-			ID:        hex.EncodeToString(tx.ID),
-			Topic:     tx.Topic,
-			Payload:   tx.Payload,
-			CreatedAt: timestamp,
+		messageslice = append(messageslice, &domain.PartialMessage{
+			Hash:  hex.EncodeToString(tx.ID),
+			Topic: tx.Topic,
 		})
 	}
 
