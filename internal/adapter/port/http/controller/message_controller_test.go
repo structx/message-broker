@@ -64,6 +64,12 @@ func (suite *MessageControllerSuite) TestFetchMessage() {
 	}
 }
 
+func (suite *MessageControllerSuite) TestListMessages() {}
+
+func (suite *MessageControllerSuite) TestListTopics() {}
+
+func (suite *MessageControllerSuite) TestListByTopic() {}
+
 func TestMessageControllerSuite(t *testing.T) {
 	suite.Run(t, new(MessageControllerSuite))
 }

@@ -15,7 +15,7 @@ type Health struct {
 // interface compliance
 var _ ServiceController = (*Health)(nil)
 
-// NewHealthController return new health controller
+// NewHealth return new health controller
 func NewHealth(logger *zap.Logger) *Health {
 	return &Health{
 		log: logger.Sugar().Named("health_controller"),

@@ -48,11 +48,17 @@ type MessagePayload struct {
 // GetMessageResponse http get message response model
 type GetMessageResponse struct {
 	Payload *MessagePayload `json:"payload"`
+	Elapsed int64           `json:"elapsed"`
 }
 
 func (m *Messages) fetchMessage(c echo.Context) error {
 
+	start := time.Now()
+
 	h := c.Param("hash")
+	if h == "" {
+		return c.String(http.StatusBadRequest, "invalid hash parameter")
+	}
 
 	msg, err := m.m.Read(h)
 	if err != nil {
@@ -67,6 +73,7 @@ func (m *Messages) fetchMessage(c echo.Context) error {
 			Payload:   msg.Payload,
 			CreatedAt: msg.CreatedAt,
 		},
+		Elapsed: time.Since(start).Milliseconds(),
 	}
 
 	return c.JSON(http.StatusAccepted, response)
@@ -114,7 +121,7 @@ func (m *Messages) listMessages(c echo.Context) error {
 
 	response := &ListMessagesResponse{
 		Payload: payload,
-		Elapsed: time.Now().Sub(start).Milliseconds(),
+		Elapsed: time.Since(start).Milliseconds(),
 	}
 
 	return c.JSON(http.StatusAccepted, response)
@@ -122,10 +129,13 @@ func (m *Messages) listMessages(c echo.Context) error {
 
 // ListTopicsResponse http list topics response model
 type ListTopicsResponse struct {
-	Topics []string `json:"topics"`
+	Topics  []string `json:"topics"`
+	Elapsed int64    `json:"elapsed"`
 }
 
 func (m *Messages) listTopics(c echo.Context) error {
+
+	start := time.Now()
 
 	l := c.QueryParam("limit")
 	o := c.QueryParam("offset")
@@ -146,7 +156,8 @@ func (m *Messages) listTopics(c echo.Context) error {
 	}
 
 	response := &ListTopicsResponse{
-		Topics: topics,
+		Topics:  topics,
+		Elapsed: time.Since(start).Milliseconds(),
 	}
 
 	return c.JSON(http.StatusAccepted, response)
@@ -160,8 +171,8 @@ type PartialMessagePayload struct {
 
 // ListByTopicResponse http list by topic response model
 type ListByTopicResponse struct {
-	Elapsed int64                    `json:"elapsed"`
 	Payload []*PartialMessagePayload `json:"payload"`
+	Elapsed int64                    `json:"elapsed"`
 }
 
 func (m *Messages) listByTopic(c echo.Context) error {
@@ -202,7 +213,7 @@ func (m *Messages) listByTopic(c echo.Context) error {
 	}
 
 	response := &ListByTopicResponse{
-		Elapsed: time.Now().Sub(start).Milliseconds(),
+		Elapsed: time.Since(start).Milliseconds(),
 		Payload: messageSlice,
 	}
 
