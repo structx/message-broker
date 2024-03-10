@@ -76,23 +76,23 @@ func (_c *MockMessenger_Create_Call) RunAndReturn(run func(*NewMessage) (*Messag
 }
 
 // List provides a mock function with given fields: limit, offset
-func (_m *MockMessenger) List(limit int, offset int) ([]*Message, error) {
+func (_m *MockMessenger) List(limit int, offset int) ([]*PartialMessage, error) {
 	ret := _m.Called(limit, offset)
 
 	if len(ret) == 0 {
 		panic("no return value specified for List")
 	}
 
-	var r0 []*Message
+	var r0 []*PartialMessage
 	var r1 error
-	if rf, ok := ret.Get(0).(func(int, int) ([]*Message, error)); ok {
+	if rf, ok := ret.Get(0).(func(int, int) ([]*PartialMessage, error)); ok {
 		return rf(limit, offset)
 	}
-	if rf, ok := ret.Get(0).(func(int, int) []*Message); ok {
+	if rf, ok := ret.Get(0).(func(int, int) []*PartialMessage); ok {
 		r0 = rf(limit, offset)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*Message)
+			r0 = ret.Get(0).([]*PartialMessage)
 		}
 	}
 
@@ -124,12 +124,12 @@ func (_c *MockMessenger_List_Call) Run(run func(limit int, offset int)) *MockMes
 	return _c
 }
 
-func (_c *MockMessenger_List_Call) Return(_a0 []*Message, _a1 error) *MockMessenger_List_Call {
+func (_c *MockMessenger_List_Call) Return(_a0 []*PartialMessage, _a1 error) *MockMessenger_List_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *MockMessenger_List_Call) RunAndReturn(run func(int, int) ([]*Message, error)) *MockMessenger_List_Call {
+func (_c *MockMessenger_List_Call) RunAndReturn(run func(int, int) ([]*PartialMessage, error)) *MockMessenger_List_Call {
 	_c.Call.Return(run)
 	return _c
 }

@@ -44,7 +44,7 @@ type Messenger interface {
 	// Read message by hash
 	Read(hash string) (*Message, error)
 	// List messages
-	List(limit, offset int) ([]*Message, error)
+	List(limit, offset int) ([]*PartialMessage, error)
 	// ListByTopic messages by topic
 	ListByTopic(topic string, limit, offset int) ([]*PartialMessage, error)
 	// ListTopics retrieve message topics

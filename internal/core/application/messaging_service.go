@@ -74,31 +74,24 @@ func (m *MessagingService) Acknowledge(_ context.Context) error {
 }
 
 // List messages by limit and offset
-func (m *MessagingService) List(limit, offset int) ([]*domain.Message, error) {
+func (m *MessagingService) List(limit, offset int) ([]*domain.PartialMessage, error) {
 
 	txslice, err := m.c.ListTransactions(limit, offset)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list transactions by action %v", err)
 	}
 
-	messageslice := make([]*domain.Message, 0, limit)
+	partialMessageSlice := make([]*domain.PartialMessage, 0, limit)
 
 	for _, tx := range txslice {
 
-		timestamp, err := time.Parse(time.RFC3339, tx.Timestamp)
-		if err != nil {
-			return nil, fmt.Errorf("failed to parse tx timestamp %v", err)
-		}
-
-		messageslice = append(messageslice, &domain.Message{
-			Hash:      hex.EncodeToString(tx.ID),
-			Topic:     tx.Topic,
-			Payload:   tx.Payload,
-			CreatedAt: timestamp,
+		partialMessageSlice = append(partialMessageSlice, &domain.PartialMessage{
+			Hash:  hex.EncodeToString(tx.ID),
+			Topic: tx.Topic,
 		})
 	}
 
-	return messageslice, nil
+	return partialMessageSlice, nil
 }
 
 // ListByTopic retrieve messages by topic

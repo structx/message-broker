@@ -81,8 +81,8 @@ func (m *Messages) fetchMessage(c echo.Context) error {
 
 // ListMessagesResponse http list messages response model
 type ListMessagesResponse struct {
-	Payload []*MessagePayload `json:"payload"`
-	Elapsed int64             `json:"elapsed"`
+	Payload []*PartialMessagePayload `json:"payload"`
+	Elapsed int64                    `json:"elapsed"`
 }
 
 func (m *Messages) listMessages(c echo.Context) error {
@@ -108,14 +108,12 @@ func (m *Messages) listMessages(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, "failed to list messages")
 	}
 
-	payload := make([]*MessagePayload, 0, len(messageSlice))
+	payload := make([]*PartialMessagePayload, 0, len(messageSlice))
 
 	for _, msg := range messageSlice {
-		payload = append(payload, &MessagePayload{
-			Hash:      msg.Hash,
-			Topic:     msg.Topic,
-			Payload:   msg.Payload,
-			CreatedAt: msg.CreatedAt,
+		payload = append(payload, &PartialMessagePayload{
+			Hash:  msg.Hash,
+			Topic: msg.Topic,
 		})
 	}
 
