@@ -195,6 +195,64 @@ func (_c *MockChain_ListTransactionsByAction_Call) RunAndReturn(run func(string,
 	return _c
 }
 
+// ReadTx provides a mock function with given fields: hash
+func (_m *MockChain) ReadTx(hash string) (*Tx, error) {
+	ret := _m.Called(hash)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ReadTx")
+	}
+
+	var r0 *Tx
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string) (*Tx, error)); ok {
+		return rf(hash)
+	}
+	if rf, ok := ret.Get(0).(func(string) *Tx); ok {
+		r0 = rf(hash)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*Tx)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(hash)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockChain_ReadTx_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ReadTx'
+type MockChain_ReadTx_Call struct {
+	*mock.Call
+}
+
+// ReadTx is a helper method to define mock.On call
+//   - hash string
+func (_e *MockChain_Expecter) ReadTx(hash interface{}) *MockChain_ReadTx_Call {
+	return &MockChain_ReadTx_Call{Call: _e.mock.On("ReadTx", hash)}
+}
+
+func (_c *MockChain_ReadTx_Call) Run(run func(hash string)) *MockChain_ReadTx_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string))
+	})
+	return _c
+}
+
+func (_c *MockChain_ReadTx_Call) Return(_a0 *Tx, _a1 error) *MockChain_ReadTx_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockChain_ReadTx_Call) RunAndReturn(run func(string) (*Tx, error)) *MockChain_ReadTx_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // NewMockChain creates a new instance of MockChain. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewMockChain(t interface {

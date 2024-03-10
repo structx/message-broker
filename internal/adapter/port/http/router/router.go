@@ -20,8 +20,7 @@ func NewRouter(logger *zap.Logger, m domain.Messenger) *echo.Echo {
 		controller.NewHealth(logger),
 	}
 
-	api := e.Group("/api")
-	v1 := api.Group("/v1")
+	v1 := e.Group("/api/v1")
 
 	for _, c := range controllers {
 

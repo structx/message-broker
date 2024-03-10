@@ -68,7 +68,7 @@ func (g *GRPCServer) Publish(_ context.Context, in *pb.Envelope) (*pb.Stub, erro
 	msg, err := g.m.Create(&domain.NewMessage{
 		Topic:     topic,
 		Payload:   payload,
-		Publisher: "test",
+		Signature: "test",
 	})
 	if err != nil {
 		g.log.Errorf("g.m.Create: %v", err)
@@ -88,7 +88,7 @@ func (g *GRPCServer) Publish(_ context.Context, in *pb.Envelope) (*pb.Stub, erro
 	}
 
 	return &pb.Stub{
-		EnvelopeId: msg.ID,
+		EnvelopeId: msg.Hash,
 	}, nil
 }
 

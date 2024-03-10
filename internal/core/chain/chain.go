@@ -106,6 +106,38 @@ func (c *Chain) AddTx(data, action string, payload []byte, signature string) (st
 	return hex.EncodeToString(tx.ID), nil
 }
 
+// ReadTx read transaction by id hash
+func (c *Chain) ReadTx(hash string) (*domain.Tx, error) {
+
+	it := newIterator(c.kv, c.lastHash)
+
+	for {
+
+		block, err := it.next()
+		if err != nil && err == errEOC {
+			return nil, ErrNotFound
+		} else if err != nil {
+			return nil, fmt.Errorf("failed to read next transaction %v", err)
+		}
+
+		if block == nil {
+			break
+		}
+
+	INNER:
+		for _, tx := range block.Txs {
+
+			if hex.EncodeToString(tx.ID) == hash {
+				return tx, nil
+			}
+
+			continue INNER
+		}
+	}
+
+	return nil, ErrNotFound
+}
+
 // ListTransactions with limit and offset
 func (c *Chain) ListTransactions(limit, offset int) ([]*domain.Tx, error) {
 

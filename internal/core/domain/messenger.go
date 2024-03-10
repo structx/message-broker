@@ -18,15 +18,21 @@ const (
 type NewMessage struct {
 	Topic     string
 	Payload   []byte
-	Publisher string
+	Signature string
 }
 
 // Message ...
 type Message struct {
-	ID        string
+	Hash      string
 	Topic     string
 	Payload   []byte
 	CreatedAt time.Time
+}
+
+// PartialMessage ...
+type PartialMessage struct {
+	Hash  string
+	Topic string
 }
 
 // Messenger messaging service interface
@@ -38,9 +44,9 @@ type Messenger interface {
 	// Read message by hash
 	Read(hash string) (*Message, error)
 	// List messages
-	List(limit, offset int) ([]*Message, error)
+	List(limit, offset int) ([]*PartialMessage, error)
 	// ListByTopic messages by topic
-	ListByTopic(topic string, limit, offset int) ([]*Message, error)
+	ListByTopic(topic string, limit, offset int) ([]*PartialMessage, error)
 	// ListTopics retrieve message topics
 	ListTopics(limit, offset int) ([]string, error)
 }
