@@ -10,7 +10,7 @@ services:
     ports: 
       - 2112
       - 8080:8080
-      - 50051:5001
+      - 50051:50051
     environment:
       - KV_DIR=/var/lib/message_broker/kv
       - SERVER_HTTP_PORT=8080

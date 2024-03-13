@@ -10,21 +10,22 @@ import (
 )
 
 // HashWithSHA3AndDifficulty generate sha3 hash with difficulty check
-func HashWithSHA3AndDifficulty(timestamp string, difficulty int) string {
+func HashWithSHA3AndDifficulty(timestamp, prevHash string, data []byte, difficulty int) string {
 
-	for i := 0; ; i++ {
+	for i := 10; ; i++ {
 
-		n := fmt.Sprintf("%x", i)
-		h := hashSHA3(n, timestamp)
+		h := hashSHA3(i, timestamp, prevHash, data)
 		if isHashValid(h, difficulty) {
 			return h
 		}
 	}
 }
 
-func hashSHA3(nounce, timestamp string) string {
+func hashSHA3(nounce int, timestamp, prevHash string, data []byte) string {
 	h := sha3.New224()
-	h.Write([]byte(nounce + timestamp))
+	h.Write([]byte(fmt.Sprintf("%x", nounce)))
+	h.Write([]byte(timestamp + prevHash))
+	h.Write(data)
 	return hex.EncodeToString(h.Sum(nil))
 }
 

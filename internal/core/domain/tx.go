@@ -23,7 +23,7 @@ func NewTx(data, action string, payload []byte, signature string) *Tx {
 		Topic:     data,
 		Action:    action,
 		Payload:   payload,
-		Timestamp: time.Now().String(),
+		Timestamp: time.Now().Format(time.RFC3339),
 		Sig:       signature,
 	}
 }

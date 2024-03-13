@@ -84,7 +84,7 @@ func (c *Chain) AddTx(data, action string, payload []byte, signature string) (st
 		// create new block
 		currentblock = domain.NewBlock(c.lastHash, tx)
 		// generate hash with simple difficulty
-		hash := pow.HashWithSHA3AndDifficulty(currentblock.Timestamp, 1)
+		hash := pow.HashWithSHA3AndDifficulty(currentblock.Timestamp, currentblock.PrevHash, tx.Payload, 1)
 
 		// assign hash and chain latest hash
 		currentblock.Hash = hash
@@ -244,9 +244,11 @@ func (c *Chain) getCurrentBlock() (*domain.Block, error) {
 
 func genesisBlock() *domain.Block {
 	return &domain.Block{
-		Hash:      pow.HashWithSHA3AndDifficulty(time.Now().String(), 0),
+		Hash:      pow.HashWithSHA3AndDifficulty(time.Now().UTC().String(), "", []byte("gensis block"), 0),
 		PrevHash:  "",
-		Timestamp: time.Now().Format(time.RFC3339),
+		Timestamp: time.Now().UTC().Format(time.RFC3339),
 		Txs:       []*domain.Tx{},
+		Height:    1,
+		MaxHeight: 10,
 	}
 }

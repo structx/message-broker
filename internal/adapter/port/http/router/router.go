@@ -2,9 +2,12 @@
 package router
 
 import (
+	"net/http"
+
 	"go.uber.org/zap"
 
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 
 	"github.com/trevatk/block-broker/internal/adapter/port/http/controller"
 	"github.com/trevatk/block-broker/internal/core/domain"
@@ -14,6 +17,14 @@ import (
 func NewRouter(logger *zap.Logger, m domain.Messenger) *echo.Echo {
 
 	e := echo.New()
+
+	e.Use(middleware.CORSWithConfig(
+		middleware.CORSConfig{
+			AllowOrigins: []string{"http://*", "https://*"},
+			AllowMethods: []string{http.MethodGet},
+			AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
+		},
+	))
 
 	controllers := []interface{}{
 		controller.NewMessages(logger, m),
