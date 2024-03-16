@@ -74,7 +74,12 @@ func registerHooks(lc fx.Lifecycle, s1 *http.Server, s2 *rpc.GRPCServer, c domai
 				// graceful shutdown gRPC server
 				s2.Shutdown()
 
-				return c.Shutdown()
+				err = c.Shutdown()
+				if err != nil {
+					result = multierr.Append(result, fmt.Errorf("failed to shutdown chain %v", err))
+				}
+
+				return result
 			},
 		},
 	)
