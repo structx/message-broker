@@ -3,16 +3,15 @@ module github.com/trevatk/block-broker
 go 1.22.0
 
 require (
-	github.com/cockroachdb/pebble v1.1.0
 	github.com/labstack/echo/v4 v4.9.0
 	github.com/sethvargo/go-envconfig v1.0.0
 	github.com/stretchr/testify v1.8.4
+	github.com/trevatk/go-pkg v0.0.2
 	go.uber.org/fx v1.20.1
 	go.uber.org/multierr v1.10.0
-	go.uber.org/zap v1.26.0
+	go.uber.org/zap v1.27.0
 	golang.org/x/crypto v0.19.0
 	google.golang.org/grpc v1.61.0
-	google.golang.org/protobuf v1.32.0
 )
 
 require (
@@ -21,6 +20,7 @@ require (
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/cockroachdb/errors v1.11.1 // indirect
 	github.com/cockroachdb/logtags v0.0.0-20230118201751-21c54148d20b // indirect
+	github.com/cockroachdb/pebble v1.1.0 // indirect
 	github.com/cockroachdb/redact v1.1.5 // indirect
 	github.com/cockroachdb/tokenbucket v0.0.0-20230807174530-cc333fc44b06 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
@@ -54,5 +54,6 @@ require (
 	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/time v0.0.0-20220922220347-f3bd1da661af // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20231106174013-bbf56f31fb17 // indirect
+	google.golang.org/protobuf v1.32.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
