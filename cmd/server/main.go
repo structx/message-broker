@@ -30,7 +30,6 @@ func main() {
 		fx.Provide(logging.NewLogger),
 		fx.Provide(setup.NewConfig),
 		fx.Invoke(setup.ProcessConfigWithEnv),
-		fx.Provide(fx.Annotate(kv.NewPebble, fx.As(new(kv.KV)))),
 		fx.Provide(fx.Annotate(chain.NewChain, fx.As(new(domain.Chain)))),
 		fx.Provide(fx.Annotate(application.NewMessagingService, fx.As(new(domain.Messenger)))),
 		fx.Provide(fx.Annotate(router.NewRouter, fx.As(new(http.Handler)))),

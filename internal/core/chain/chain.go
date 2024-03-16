@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/trevatk/block-broker/internal/adapter/setup"
 	"github.com/trevatk/block-broker/internal/core/chain/pow"
 	"github.com/trevatk/block-broker/internal/core/domain"
 	"github.com/trevatk/go-pkg/storage/kv"
@@ -24,7 +25,12 @@ var _ domain.Chain = (*Chain)(nil)
 
 // NewChain return new chain class
 // provides an existing chain or create new
-func NewChain(db kv.KV) (*Chain, error) {
+func NewChain(cfg *setup.Config) (*Chain, error) {
+
+	db, err := kv.NewPebble(cfg.KV.Dir)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create new pebble database %v", err)
+	}
 
 	v, err := db.Get([]byte("last_hash"))
 	if err != nil {
