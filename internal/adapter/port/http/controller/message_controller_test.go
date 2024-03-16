@@ -9,9 +9,9 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/trevatk/block-broker/internal/adapter/logging"
 	"github.com/trevatk/block-broker/internal/adapter/port/http/router"
 	"github.com/trevatk/block-broker/internal/core/domain"
+	"github.com/trevatk/go-pkg/logging"
 )
 
 type MessageControllerSuite struct {

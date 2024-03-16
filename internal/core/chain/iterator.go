@@ -5,14 +5,15 @@ import (
 	"fmt"
 
 	"github.com/trevatk/block-broker/internal/core/domain"
+	"github.com/trevatk/go-pkg/storage/kv"
 )
 
 type iterator struct {
-	kv       domain.KV
+	kv       kv.KV
 	lastHash string
 }
 
-func newIterator(kv domain.KV, hash string) *iterator {
+func newIterator(kv kv.KV, hash string) *iterator {
 	return &iterator{
 		kv:       kv,
 		lastHash: hash,

@@ -8,14 +8,14 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/trevatk/block-broker/internal/adapter/storage/kv"
 	"github.com/trevatk/block-broker/internal/core/chain/pow"
 	"github.com/trevatk/block-broker/internal/core/domain"
+	"github.com/trevatk/go-pkg/storage/kv"
 )
 
 // Chain implementation of blockchain interface
 type Chain struct {
-	kv       domain.KV
+	kv       kv.KV
 	lastHash string
 }
 
@@ -24,7 +24,7 @@ var _ domain.Chain = (*Chain)(nil)
 
 // NewChain return new chain class
 // provides an existing chain or create new
-func NewChain(db domain.KV) (*Chain, error) {
+func NewChain(db kv.KV) (*Chain, error) {
 
 	v, err := db.Get([]byte("last_hash"))
 	if err != nil {

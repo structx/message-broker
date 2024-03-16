@@ -6,8 +6,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/suite"
-	"github.com/trevatk/block-broker/internal/adapter/logging"
 	"github.com/trevatk/block-broker/internal/adapter/port/http/router"
+	"github.com/trevatk/go-pkg/logging"
 )
 
 type HealthSuite struct {

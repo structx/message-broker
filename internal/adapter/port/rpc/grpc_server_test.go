@@ -11,11 +11,11 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/trevatk/block-broker/internal/adapter/logging"
 	"github.com/trevatk/block-broker/internal/adapter/port/rpc"
-	pb "github.com/trevatk/block-broker/internal/adapter/port/rpc/proto/messaging/v1"
 	"github.com/trevatk/block-broker/internal/adapter/setup"
 	"github.com/trevatk/block-broker/internal/core/domain"
+	"github.com/trevatk/go-pkg/logging"
+	pb "github.com/trevatk/go-pkg/proto/messaging/v1"
 )
 
 func init() {
@@ -24,7 +24,7 @@ func init() {
 
 type GRPCServerSuite struct {
 	suite.Suite
-	s pb.MessagingServiceServer
+	s pb.MessagingServiceV1Server
 }
 
 func (suite *GRPCServerSuite) SetupTest() {

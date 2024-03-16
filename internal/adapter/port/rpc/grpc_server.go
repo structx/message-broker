@@ -15,15 +15,15 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	pb "github.com/trevatk/block-broker/internal/adapter/port/rpc/proto/messaging/v1"
 	"github.com/trevatk/block-broker/internal/adapter/setup"
 	"github.com/trevatk/block-broker/internal/core/domain"
+	pb "github.com/trevatk/go-pkg/proto/messaging/v1"
 )
 
 // GRPCServer implementation of messaging service gRPC interface
 type GRPCServer struct {
 	// server interface compliance
-	pb.UnimplementedMessagingServiceServer
+	pb.UnimplementedMessagingServiceV1Server
 
 	m domain.Messenger
 
@@ -93,7 +93,7 @@ func (g *GRPCServer) Publish(_ context.Context, in *pb.Envelope) (*pb.Stub, erro
 }
 
 // Subscribe store subscription in memory
-func (g *GRPCServer) Subscribe(in *pb.Subscription, stream pb.MessagingService_SubscribeServer) error {
+func (g *GRPCServer) Subscribe(in *pb.Subscription, stream pb.MessagingServiceV1_SubscribeServer) error {
 
 	ctx := stream.Context()
 
@@ -103,13 +103,13 @@ func (g *GRPCServer) Subscribe(in *pb.Subscription, stream pb.MessagingService_S
 		return status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	if v, ok := g.subs.LoadOrStore(topic, []pb.MessagingService_SubscribeServer{}); !ok {
-		if subs, ok := v.([]pb.MessagingService_SubscribeServer); ok {
+	if v, ok := g.subs.LoadOrStore(topic, []pb.MessagingServiceV1_SubscribeServer{}); !ok {
+		if subs, ok := v.([]pb.MessagingServiceV1_SubscribeServer); ok {
 			subs = append(subs, stream)
 			g.subs.Store(topic, subs)
 		}
 	} else {
-		g.subs.Store(topic, []pb.MessagingService_SubscribeServer{stream})
+		g.subs.Store(topic, []pb.MessagingServiceV1_SubscribeServer{stream})
 	}
 
 OUTER:
@@ -139,7 +139,7 @@ OUTER:
 					continue OUTER
 				}
 
-				subs, ok := v.([]pb.MessagingService_SubscribeServer)
+				subs, ok := v.([]pb.MessagingServiceV1_SubscribeServer)
 				if !ok {
 					continue OUTER
 				}
@@ -169,7 +169,7 @@ func (g *GRPCServer) RequestResponse(_ context.Context, _ *pb.Envelope) (*pb.Env
 func (g *GRPCServer) Start() error {
 
 	g.s = grpc.NewServer()
-	pb.RegisterMessagingServiceServer(g.s, g)
+	pb.RegisterMessagingServiceV1Server(g.s, g)
 
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", g.port))
 	if err != nil {

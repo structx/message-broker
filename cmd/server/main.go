@@ -12,12 +12,13 @@ import (
 	"go.uber.org/multierr"
 	"go.uber.org/zap"
 
-	"github.com/trevatk/block-broker/internal/adapter/logging"
+	"github.com/trevatk/go-pkg/logging"
+	"github.com/trevatk/go-pkg/storage/kv"
+
 	"github.com/trevatk/block-broker/internal/adapter/port/http/router"
 	"github.com/trevatk/block-broker/internal/adapter/port/http/server"
 	"github.com/trevatk/block-broker/internal/adapter/port/rpc"
 	"github.com/trevatk/block-broker/internal/adapter/setup"
-	"github.com/trevatk/block-broker/internal/adapter/storage/kv"
 	"github.com/trevatk/block-broker/internal/core/application"
 	"github.com/trevatk/block-broker/internal/core/chain"
 	"github.com/trevatk/block-broker/internal/core/domain"
@@ -29,7 +30,7 @@ func main() {
 		fx.Provide(logging.NewLogger),
 		fx.Provide(setup.NewConfig),
 		fx.Invoke(setup.ProcessConfigWithEnv),
-		fx.Provide(fx.Annotate(kv.NewPebble, fx.As(new(domain.KV)))),
+		fx.Provide(fx.Annotate(kv.NewPebble, fx.As(new(kv.KV)))),
 		fx.Provide(fx.Annotate(chain.NewChain, fx.As(new(domain.Chain)))),
 		fx.Provide(fx.Annotate(application.NewMessagingService, fx.As(new(domain.Messenger)))),
 		fx.Provide(fx.Annotate(router.NewRouter, fx.As(new(http.Handler)))),
@@ -42,7 +43,7 @@ func main() {
 	).Run()
 }
 
-func registerHooks(lc fx.Lifecycle, s1 *http.Server, s2 *rpc.GRPCServer, kv domain.KV) error {
+func registerHooks(lc fx.Lifecycle, s1 *http.Server, s2 *rpc.GRPCServer, kv kv.KV) error {
 	lc.Append(
 		fx.Hook{
 			OnStart: func(_ context.Context) error {
