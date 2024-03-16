@@ -21,6 +21,11 @@ job "message-broker" {
             name = "broker-dashboard" 
             port = "dashboard"
 
+            tags = [
+                "traefik.enable",
+                "traefik.tcp.routers.broker-router.rule=HostSNI(``)",
+            ]
+
             provider = "consul"
 
             connect {
