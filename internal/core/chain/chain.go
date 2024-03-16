@@ -248,6 +248,11 @@ func (c *Chain) getCurrentBlock() (*domain.Block, error) {
 	return &b, nil
 }
 
+// Shutdown chain
+func (c *Chain) Shutdown() error {
+	return c.kv.Close()
+}
+
 func genesisBlock() *domain.Block {
 	return &domain.Block{
 		Hash:      pow.HashWithSHA3AndDifficulty(time.Now().UTC().String(), "", []byte("gensis block"), 0),
