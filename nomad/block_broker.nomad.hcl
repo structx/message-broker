@@ -18,12 +18,11 @@ job "message-broker" {
         }
 
         service {
-            name = "broker-dashboard" 
+            name = "message-broker" 
             port = "dashboard"
 
             tags = [
-                "traefik.enable",
-                "traefik.tcp.routers.broker-router.rule=HostSNI(``)",
+                "traefik.enable=true",
             ]
 
             provider = "consul"
