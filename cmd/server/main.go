@@ -13,7 +13,6 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/trevatk/go-pkg/logging"
-	"github.com/trevatk/go-pkg/storage/kv"
 
 	"github.com/trevatk/block-broker/internal/adapter/port/http/router"
 	"github.com/trevatk/block-broker/internal/adapter/port/http/server"
@@ -30,7 +29,6 @@ func main() {
 		fx.Provide(logging.NewLogger),
 		fx.Provide(setup.NewConfig),
 		fx.Invoke(setup.ProcessConfigWithEnv),
-		fx.Provide(fx.Annotate(kv.NewPebble, fx.As(new(kv.KV)))),
 		fx.Provide(fx.Annotate(chain.NewChain, fx.As(new(domain.Chain)))),
 		fx.Provide(fx.Annotate(application.NewMessagingService, fx.As(new(domain.Messenger)))),
 		fx.Provide(fx.Annotate(router.NewRouter, fx.As(new(http.Handler)))),
@@ -43,7 +41,7 @@ func main() {
 	).Run()
 }
 
-func registerHooks(lc fx.Lifecycle, s1 *http.Server, s2 *rpc.GRPCServer, kv kv.KV) error {
+func registerHooks(lc fx.Lifecycle, s1 *http.Server, s2 *rpc.GRPCServer, c domain.Chain) error {
 	lc.Append(
 		fx.Hook{
 			OnStart: func(_ context.Context) error {
@@ -76,10 +74,9 @@ func registerHooks(lc fx.Lifecycle, s1 *http.Server, s2 *rpc.GRPCServer, kv kv.K
 				// graceful shutdown gRPC server
 				s2.Shutdown()
 
-				// close kv database
-				err = kv.Close()
+				err = c.Shutdown()
 				if err != nil {
-					result = multierr.Append(result, fmt.Errorf("failed to close kv database %v", err))
+					result = multierr.Append(result, fmt.Errorf("failed to shutdown chain %v", err))
 				}
 
 				return result

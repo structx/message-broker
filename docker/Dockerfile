@@ -12,7 +12,7 @@ FROM gcr.io/distroless/static-debian11
 
 COPY --from=builder /usr/bin/ /app/bin/
 
-VOLUME [ "/var/lib/message_broker/kv", "/var/log/message_broker" ]
+VOLUME [ "/var/lib/broker/kv", "/var/log/broker" ]
 
 EXPOSE 2112 8080
 

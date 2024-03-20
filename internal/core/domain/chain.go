@@ -12,4 +12,6 @@ type Chain interface {
 	ListTransactions(limit, offset int) ([]*Tx, error)
 	// ListTransactionsByAction
 	ListTransactionsByAction(input string, limit, offset int) ([]*Tx, error)
+	// Shutdown
+	Shutdown() error
 }
