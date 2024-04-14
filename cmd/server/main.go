@@ -14,6 +14,7 @@ import (
 
 	"github.com/trevatk/go-pkg/logging"
 
+	"github.com/trevatk/block-broker/internal/adapter/port/http/controller"
 	"github.com/trevatk/block-broker/internal/adapter/port/http/router"
 	"github.com/trevatk/block-broker/internal/adapter/port/http/server"
 	"github.com/trevatk/block-broker/internal/adapter/port/rpc"
@@ -34,6 +35,7 @@ func main() {
 		fx.Provide(fx.Annotate(router.NewRouter, fx.As(new(http.Handler)))),
 		fx.Provide(rpc.NewGRPCServer),
 		fx.Provide(server.NewHTTPServer),
+		fx.Invoke(controller.InvokeMetricsController),
 		fx.Invoke(registerHooks),
 		fx.WithLogger(func(log *zap.Logger) fxevent.Logger {
 			return &fxevent.ZapLogger{Logger: log}
