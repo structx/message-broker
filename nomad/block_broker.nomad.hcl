@@ -1,10 +1,10 @@
 
 job "message-broker" {
 
-    datacenters = [""]
+    datacenters = ["dc1"]
     type = "service"
 
-    namespace = ""
+    namespace = "structx"
 
     group "" {
         count = 1
@@ -14,11 +14,15 @@ job "message-broker" {
 
             port "dashboard" {}
 
-            port "messenger" {}
+            port "rpc" {}
+
+            port "metrics" {
+                to = 2112
+            }
         }
 
         service {
-            name = "message-broker" 
+            name = "message-broker-dashboard" 
             port = "dashboard"
 
             tags = [
@@ -30,11 +34,29 @@ job "message-broker" {
             connect {
                 sidecar_service {}
             }
+
+            check {
+                type = "http"
+                path = "/health"
+                interval = "10s"
+                timeout = "3s"
+            }
         }
 
         service {
-            name = "broker-messenger"
-            port = "messenger"
+            name = "message-broker-metrics"
+            port = "metrics"
+
+            tags = [
+                "metrics"
+            ]
+
+            provider = "consul"
+        }
+
+        service {
+            name = "broker-messenger-rpc"
+            port = "rpc"
 
             provider = "consul"
 
@@ -53,8 +75,8 @@ job "message-broker" {
             driver = "docker"
 
             config {
-                image = ""
-                ports = ["dashboard", "messenger"]
+                image = "trevatk/message-broker:v0.0.1"
+                ports = [ "dashboard", "rpc", "metrics" ]
             }
 
             volume {
