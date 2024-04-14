@@ -8,7 +8,7 @@ RUN go mod tidy && go mod download
 COPY . .
 RUN CGO_ENABLED=0 go build -o /usr/bin/server ./cmd/server
 
-FROM gcr.io/distroless/static-debian11
+FROM gcr.io/distroless/static-debian12
 
 COPY --from=builder /usr/bin/ /app/bin/
 

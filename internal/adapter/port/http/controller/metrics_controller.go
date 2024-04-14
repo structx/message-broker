@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -10,6 +11,9 @@ import (
 func InvokeMetricsController() {
 	http.Handle("/metrics", promhttp.Handler())
 	go func() {
-		http.ListenAndServe(":2112", nil)
+		err := http.ListenAndServe(":2112", nil)
+		if err != nil {
+			log.Fatalf("failed to start metrics server %v", err)
+		}
 	}()
 }

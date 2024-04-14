@@ -6,7 +6,7 @@ job "message-broker" {
 
     namespace = "structx"
 
-    group "" {
+    group "trevatk" {
         count = 1
 
         network {
@@ -67,7 +67,7 @@ job "message-broker" {
 
         volume "kv-volume" {
             type = "host"
-            source = "broker-volume"
+            source = "block-broker-volume"
             read_only = false
         }
 
@@ -79,7 +79,7 @@ job "message-broker" {
                 ports = [ "dashboard", "rpc", "metrics" ]
             }
 
-            volume {
+            volume_mount {
                 volume = "kv-volume"
                 destination = "/var/lib/broker/kv"
                 read_only = false
@@ -87,7 +87,7 @@ job "message-broker" {
 
             env {
                 SERVER_HTTP_PORT = "${NOMAD_PORT_dashboard}"
-                SERVER_GRPC_PORT = "${NOMAD_PORT_messenger}"
+                SERVER_GRPC_PORT = "${NOMAD_PORT_rpc}"
                 KV_DIR = "/var/lib/broker/kv"
             }
         }
