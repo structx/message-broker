@@ -32,7 +32,7 @@ func (suite *GRPCServerSuite) SetupTest() {
 	assert := suite.Assert()
 	ctx := context.TODO()
 
-	logger, err := logging.NewLogger()
+	logger, err := logging.NewLoggerFromEnv()
 	assert.NoError(err)
 
 	cfg := setup.NewConfig()

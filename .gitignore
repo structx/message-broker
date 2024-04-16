@@ -1,3 +1,4 @@
 vendor
 testfiles
-pebble
+kv
+logs

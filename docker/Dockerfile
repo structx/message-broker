@@ -14,6 +14,6 @@ COPY --from=builder /usr/bin/ /app/bin/
 
 VOLUME [ "/var/lib/broker/kv", "/var/log/broker" ]
 
-EXPOSE 2112 8080
+EXPOSE 8080 50051 2112
 
 ENTRYPOINT [ "/app/bin/server" ]

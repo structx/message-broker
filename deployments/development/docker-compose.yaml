@@ -1,0 +1,27 @@
+---
+version: '3.7'
+
+services:
+  message-broker:
+    image: trevatk/message-broker:latest
+    container_name: message-broker
+    hostname: message-broker.structx.docker
+    restart: 'no'
+    environment:
+      - LOG_LEVEL=DEBUG
+      - LOG_PATH=/var/log/broker/broker.log
+      - SERVER_HTTP_PORT=8080
+      - SERVER_GRPC_PORT=50051
+      - KV_DIR=/var/lib/broker/kv
+    ports:
+      - 8080:8080
+      - 50051:50051
+      - 2112
+    volumes:
+      - ./kv:/var/lib/broker/kv:rw
+      - ./logs:/var/log/broker:rw
+
+networks:
+  default:
+    name: public-network
+    external: true

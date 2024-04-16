@@ -19,7 +19,7 @@ func (suite *HealthSuite) SetupTest() {
 
 	assert := suite.Assert()
 
-	logger, err := logging.NewLogger()
+	logger, err := logging.NewLoggerFromEnv()
 	assert.NoError(err)
 
 	suite.handler = router.NewRouter(logger, nil)

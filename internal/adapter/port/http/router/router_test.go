@@ -23,7 +23,7 @@ func Test_NewRouter(t *testing.T) {
 
 		ctx := context.TODO()
 
-		logger, err := logging.NewLogger()
+		logger, err := logging.NewLoggerFromEnv()
 		assert.NoError(err)
 
 		cfg := setup.NewConfig()

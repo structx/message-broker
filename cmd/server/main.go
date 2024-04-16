@@ -27,7 +27,7 @@ import (
 func main() {
 	fx.New(
 		fx.Provide(context.TODO),
-		fx.Provide(logging.NewLogger),
+		fx.Provide(logging.NewLoggerFromEnv),
 		fx.Provide(setup.NewConfig),
 		fx.Invoke(setup.ProcessConfigWithEnv),
 		fx.Provide(fx.Annotate(chain.NewChain, fx.As(new(domain.Chain)))),

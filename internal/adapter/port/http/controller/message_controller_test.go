@@ -23,7 +23,7 @@ func (suite *MessageControllerSuite) SetupTest() {
 
 	assert := suite.Assert()
 
-	logger, err := logging.NewLogger()
+	logger, err := logging.NewLoggerFromEnv()
 	assert.NoError(err)
 
 	mockMessenger := domain.NewMockMessenger(suite.T())
