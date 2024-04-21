@@ -9,7 +9,7 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/trevatk/block-broker/internal/core/domain"
+	"github.com/trevatk/mora/internal/core/domain"
 )
 
 // Messages controller class

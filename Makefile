@@ -1,6 +1,6 @@
 
-image:
-	docker build -t trevatk/message-broker:v0.0.1 -f ./docker/Dockerfile .
+build:
+	docker build -t trevatk/mora:v0.0.1 -f ./docker/Dockerfile .
 
 deps:
 	go mod tidy

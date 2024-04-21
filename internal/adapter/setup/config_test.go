@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/trevatk/block-broker/internal/adapter/setup"
+	"github.com/trevatk/mora/internal/adapter/setup"
 )
 
 func init() {

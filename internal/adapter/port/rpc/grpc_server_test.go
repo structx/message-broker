@@ -11,11 +11,11 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/trevatk/block-broker/internal/adapter/port/rpc"
-	"github.com/trevatk/block-broker/internal/adapter/setup"
-	"github.com/trevatk/block-broker/internal/core/domain"
 	"github.com/trevatk/go-pkg/logging"
 	pb "github.com/trevatk/go-pkg/proto/messaging/v1"
+	"github.com/trevatk/mora/internal/adapter/port/rpc"
+	"github.com/trevatk/mora/internal/adapter/setup"
+	"github.com/trevatk/mora/internal/core/domain"
 )
 
 func init() {

@@ -1,18 +1,16 @@
 
-job "message-broker" {
+job "mora" {
 
     datacenters = ["dc1"]
     type = "service"
 
-    namespace = "structx"
-
-    group "trevatk" {
+    group "blockchain" {
         count = 1
 
         network {
             mode = "bridge"
 
-            port "dashboard" {}
+            port "api" {}
 
             port "rpc" {}
 
@@ -22,14 +20,8 @@ job "message-broker" {
         }
 
         service {
-            name = "message-broker-dashboard" 
-            port = "dashboard"
-
-            tags = [
-                "traefik.enable=true",
-            ]
-
-            provider = "consul"
+            name = "mora-api" 
+            port = "api"
 
             connect {
                 sidecar_service {}
@@ -44,7 +36,7 @@ job "message-broker" {
         }
 
         service {
-            name = "message-broker-metrics"
+            name = "mora-metrics"
             port = "metrics"
 
             tags = [
@@ -55,7 +47,7 @@ job "message-broker" {
         }
 
         service {
-            name = "broker-messenger-rpc"
+            name = "mora-rpc"
             port = "rpc"
 
             provider = "consul"
@@ -67,7 +59,7 @@ job "message-broker" {
 
         volume "kv-volume" {
             type = "host"
-            source = "block-broker-volume"
+            source = "mora-kv-volume"
             read_only = false
         }
 
@@ -75,20 +67,20 @@ job "message-broker" {
             driver = "docker"
 
             config {
-                image = "trevatk/message-broker:v0.0.1"
-                ports = [ "dashboard", "rpc", "metrics" ]
+                image = "trevatk/mora:v0.0.1"
+                ports = [ "api", "rpc", "metrics" ]
             }
 
             volume_mount {
                 volume = "kv-volume"
-                destination = "/var/lib/broker/kv"
+                destination = "/var/lib/mora/kv"
                 read_only = false
             }
 
             env {
-                SERVER_HTTP_PORT = "${NOMAD_PORT_dashboard}"
+                SERVER_HTTP_PORT = "${NOMAD_PORT_api}"
                 SERVER_GRPC_PORT = "${NOMAD_PORT_rpc}"
-                KV_DIR = "/var/lib/broker/kv"
+                KV_DIR = "/var/lib/mora/kv"
             }
         }
     }

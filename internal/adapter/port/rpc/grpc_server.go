@@ -15,9 +15,9 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/trevatk/block-broker/internal/adapter/setup"
-	"github.com/trevatk/block-broker/internal/core/domain"
 	pb "github.com/trevatk/go-pkg/proto/messaging/v1"
+	"github.com/trevatk/mora/internal/adapter/setup"
+	"github.com/trevatk/mora/internal/core/domain"
 )
 
 // GRPCServer implementation of messaging service gRPC interface

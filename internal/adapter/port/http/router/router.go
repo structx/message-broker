@@ -9,8 +9,8 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 
-	"github.com/trevatk/block-broker/internal/adapter/port/http/controller"
-	"github.com/trevatk/block-broker/internal/core/domain"
+	"github.com/trevatk/mora/internal/adapter/port/http/controller"
+	"github.com/trevatk/mora/internal/core/domain"
 )
 
 // NewRouter return new fuego server

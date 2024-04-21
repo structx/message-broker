@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/trevatk/block-broker/internal/core/chain"
-	"github.com/trevatk/block-broker/internal/core/domain"
+	"github.com/trevatk/mora/internal/core/chain"
+	"github.com/trevatk/mora/internal/core/domain"
 )
 
 // MessagingService messaging service implementation
