@@ -6,10 +6,10 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/trevatk/block-broker/internal/adapter/port/http/router"
-	"github.com/trevatk/block-broker/internal/adapter/setup"
-	"github.com/trevatk/block-broker/internal/core/domain"
 	"github.com/trevatk/go-pkg/logging"
+	"github.com/trevatk/mora/internal/adapter/port/http/router"
+	"github.com/trevatk/mora/internal/adapter/setup"
+	"github.com/trevatk/mora/internal/core/domain"
 )
 
 func init() {

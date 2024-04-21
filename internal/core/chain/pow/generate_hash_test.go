@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/trevatk/block-broker/internal/core/chain/pow"
+	"github.com/trevatk/mora/internal/core/chain/pow"
 )
 
 func TestHashWithSHA3AndDifficulty(t *testing.T) {

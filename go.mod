@@ -1,4 +1,4 @@
-module github.com/trevatk/block-broker
+module github.com/trevatk/mora
 
 go 1.22.0
 

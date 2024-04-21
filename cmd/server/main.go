@@ -14,14 +14,14 @@ import (
 
 	"github.com/trevatk/go-pkg/logging"
 
-	"github.com/trevatk/block-broker/internal/adapter/port/http/controller"
-	"github.com/trevatk/block-broker/internal/adapter/port/http/router"
-	"github.com/trevatk/block-broker/internal/adapter/port/http/server"
-	"github.com/trevatk/block-broker/internal/adapter/port/rpc"
-	"github.com/trevatk/block-broker/internal/adapter/setup"
-	"github.com/trevatk/block-broker/internal/core/application"
-	"github.com/trevatk/block-broker/internal/core/chain"
-	"github.com/trevatk/block-broker/internal/core/domain"
+	"github.com/trevatk/mora/internal/adapter/port/http/controller"
+	"github.com/trevatk/mora/internal/adapter/port/http/router"
+	"github.com/trevatk/mora/internal/adapter/port/http/server"
+	"github.com/trevatk/mora/internal/adapter/port/rpc"
+	"github.com/trevatk/mora/internal/adapter/setup"
+	"github.com/trevatk/mora/internal/core/application"
+	"github.com/trevatk/mora/internal/core/chain"
+	"github.com/trevatk/mora/internal/core/domain"
 )
 
 func main() {

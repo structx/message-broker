@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/trevatk/block-broker/internal/adapter/setup"
+	"github.com/trevatk/mora/internal/adapter/setup"
 )
 
 // NewHTTPServer return new http server

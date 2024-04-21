@@ -8,10 +8,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/trevatk/block-broker/internal/adapter/setup"
-	"github.com/trevatk/block-broker/internal/core/chain/pow"
-	"github.com/trevatk/block-broker/internal/core/domain"
 	"github.com/trevatk/go-pkg/storage/kv"
+	"github.com/trevatk/mora/internal/adapter/setup"
+	"github.com/trevatk/mora/internal/core/chain/pow"
+	"github.com/trevatk/mora/internal/core/domain"
 )
 
 // Chain implementation of blockchain interface

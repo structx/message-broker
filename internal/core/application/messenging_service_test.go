@@ -7,8 +7,8 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/trevatk/block-broker/internal/core/application"
-	"github.com/trevatk/block-broker/internal/core/domain"
+	"github.com/trevatk/mora/internal/core/application"
+	"github.com/trevatk/mora/internal/core/domain"
 )
 
 type MessagingServiceSuite struct {
