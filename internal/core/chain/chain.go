@@ -67,7 +67,7 @@ func NewChain(cfg *setup.Config) (*Chain, error) {
 
 	return &Chain{
 		kv:       db,
-		lastHash: hex.EncodeToString(v),
+		lastHash: string(v),
 	}, nil
 }
 
