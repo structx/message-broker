@@ -10,14 +10,12 @@ import (
 // Config service configuration
 type Config struct {
 	Server *Server
-	KV     *KV
 }
 
 // NewConfig return new config class
 func NewConfig() *Config {
 	return &Config{
 		Server: &Server{},
-		KV:     &KV{},
 	}
 }
 

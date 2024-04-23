@@ -6,43 +6,48 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	"github.com/go-chi/chi/v5"
 
+	pkgcontroller "github.com/trevatk/go-pkg/http/controller"
 	"github.com/trevatk/mora/internal/adapter/port/http/controller"
 	"github.com/trevatk/mora/internal/core/domain"
 )
 
 // NewRouter return new fuego server
-func NewRouter(logger *zap.Logger, m domain.Messenger) *echo.Echo {
+func NewRouter(logger *zap.Logger, auth domain.Authenticator, m domain.Messenger) http.Handler {
 
-	e := echo.New()
+	r := chi.NewRouter()
 
-	e.Use(middleware.CORSWithConfig(
-		middleware.CORSConfig{
-			AllowOrigins: []string{"http://*", "https://*"},
-			AllowMethods: []string{http.MethodGet},
-			AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
-		},
-	))
-
-	controllers := []interface{}{
-		controller.NewMessages(logger, m),
-		controller.NewHealth(logger),
+	cc := []interface{}{
+		pkgcontroller.NewBundle(logger),
+		controller.NewRaft(logger, nil),
 	}
 
-	v1 := e.Group("/api/v1")
+	v1 := chi.NewRouter()
+	v1p := chi.NewRouter()
 
-	for _, c := range controllers {
+	v1p.Use(auth.Authenticate)
 
-		if v, ok := c.(controller.Controller); ok {
-			v.RegisterRoutesV1(v1)
+	for _, c := range cc {
+
+		if c0, ok := c.(pkgcontroller.V0); ok {
+			h := c0.RegisterRoutesV0()
+			r.Mount("/", h)
 		}
 
-		if v, ok := c.(controller.ServiceController); ok {
-			v.RegisterRoutesV0(e)
+		if c1, ok := c.(pkgcontroller.V1); ok {
+			h := c1.RegisterRoutesV1()
+			v1.Mount("/", h)
+		}
+
+		if c1p, ok := c.(pkgcontroller.V1); ok {
+			h := c1p.RegisterRoutesV1()
+			v1p.Mount("/", h)
 		}
 	}
 
-	return e
+	r.Mount("/api/v1", v1)
+	r.Mount("/api/v1/protected", v1p)
+
+	return r
 }

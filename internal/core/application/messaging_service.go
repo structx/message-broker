@@ -7,20 +7,18 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/trevatk/mora/internal/core/chain"
 	"github.com/trevatk/mora/internal/core/domain"
 )
 
 // MessagingService messaging service implementation
 type MessagingService struct {
-	c domain.Chain
 }
 
 // interface compliance
 var _ domain.Messenger = (*MessagingService)(nil)
 
 // NewMessagingService return new messaging service class
-func NewMessagingService(c domain.Chain) *MessagingService {
+func NewMessagingService() *MessagingService {
 	return &MessagingService{
 		c: c,
 	}

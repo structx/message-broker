@@ -20,7 +20,6 @@ import (
 	"github.com/trevatk/mora/internal/adapter/port/rpc"
 	"github.com/trevatk/mora/internal/adapter/setup"
 	"github.com/trevatk/mora/internal/core/application"
-	"github.com/trevatk/mora/internal/core/chain"
 	"github.com/trevatk/mora/internal/core/domain"
 )
 
@@ -30,7 +29,6 @@ func main() {
 		fx.Provide(logging.NewLogger),
 		fx.Provide(setup.NewConfig),
 		fx.Invoke(setup.ProcessConfigWithEnv),
-		fx.Provide(fx.Annotate(chain.NewChain, fx.As(new(domain.Chain)))),
 		fx.Provide(fx.Annotate(application.NewMessagingService, fx.As(new(domain.Messenger)))),
 		fx.Provide(fx.Annotate(router.NewRouter, fx.As(new(http.Handler)))),
 		fx.Provide(rpc.NewGRPCServer),
