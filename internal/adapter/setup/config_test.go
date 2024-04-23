@@ -21,7 +21,5 @@ func Test_ProcessConfigFromEnv(t *testing.T) {
 		cfg := setup.NewConfig()
 		err := setup.ProcessConfigWithEnv(context.TODO(), cfg)
 		assert.NoError(err)
-
-		assert.Equal("./testfiles/kv", cfg.KV.Dir)
 	})
 }

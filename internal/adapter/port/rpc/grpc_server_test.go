@@ -5,7 +5,6 @@ import (
 	"os"
 	"testing"
 
-	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 
 	"google.golang.org/grpc/codes"
@@ -32,16 +31,17 @@ func (suite *GRPCServerSuite) SetupTest() {
 	assert := suite.Assert()
 	ctx := context.TODO()
 
-	logger, err := logging.NewLogger()
+	logger, err := logging.NewLoggerFromEnv()
 	assert.NoError(err)
 
 	cfg := setup.NewConfig()
 	assert.NoError(setup.ProcessConfigWithEnv(ctx, cfg))
 
-	mockMessenger := domain.NewMockMessenger(suite.T())
-	mockMessenger.EXPECT().Create(mock.AnythingOfType("*domain.NewMessage")).Return(&domain.Message{}, nil).Maybe()
+	mockInterceptor := domain.NewMockAuthenticatorInterceptor(suite.T())
 
-	suite.s = rpc.NewGRPCServer(logger, cfg, mockMessenger)
+	mockRaft := domain.NewMockRaft(suite.T())
+
+	suite.s = rpc.NewGRPCServer(logger, cfg, mockInterceptor, mockRaft)
 }
 
 func (suite *GRPCServerSuite) TestPublish() {

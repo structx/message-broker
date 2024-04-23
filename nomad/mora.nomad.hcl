@@ -57,10 +57,21 @@ job "mora" {
             }
         }
 
-        volume "kv-volume" {
-            type = "host"
-            source = "mora-kv-volume"
-            read_only = false
+        template {
+            data = << EOH
+            server {
+                bind_addr = "{{ env 'NOMAD_UPSTREAM_ADDR_rpc' }}"
+                advertise_addr = ""
+
+                ports {
+                    http = "${NOMAD_PORT_api}"
+                    grpc = "${NOMAD_PORT_rpc}"
+                }
+            }
+
+            raft {}
+            EOH
+            destination = "/etc/mora/config.hcl"
         }
 
         task "server" {
@@ -71,16 +82,9 @@ job "mora" {
                 ports = [ "api", "rpc", "metrics" ]
             }
 
-            volume_mount {
-                volume = "kv-volume"
-                destination = "/var/lib/mora/kv"
-                read_only = false
-            }
-
             env {
                 SERVER_HTTP_PORT = "${NOMAD_PORT_api}"
                 SERVER_GRPC_PORT = "${NOMAD_PORT_rpc}"
-                KV_DIR = "/var/lib/mora/kv"
             }
         }
     }

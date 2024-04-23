@@ -15,21 +15,23 @@ import (
 	"github.com/trevatk/go-pkg/logging"
 
 	"github.com/trevatk/mora/internal/adapter/port/http/controller"
+	"github.com/trevatk/mora/internal/adapter/port/http/middleware"
 	"github.com/trevatk/mora/internal/adapter/port/http/router"
 	"github.com/trevatk/mora/internal/adapter/port/http/server"
 	"github.com/trevatk/mora/internal/adapter/port/rpc"
+	"github.com/trevatk/mora/internal/adapter/port/rpc/interceptor"
 	"github.com/trevatk/mora/internal/adapter/setup"
-	"github.com/trevatk/mora/internal/core/application"
 	"github.com/trevatk/mora/internal/core/domain"
 )
 
 func main() {
 	fx.New(
 		fx.Provide(context.TODO),
-		fx.Provide(logging.NewLogger),
 		fx.Provide(setup.NewConfig),
 		fx.Invoke(setup.ProcessConfigWithEnv),
-		fx.Provide(fx.Annotate(application.NewMessagingService, fx.As(new(domain.Messenger)))),
+		fx.Provide(logging.NewLoggerFromEnv),
+		fx.Provide(fx.Annotate(middleware.NewAuth, fx.As(new(domain.Authenticator)))),
+		fx.Provide(fx.Annotate(interceptor.NewAuth, fx.As(new(domain.AuthenticatorInterceptor)))),
 		fx.Provide(fx.Annotate(router.NewRouter, fx.As(new(http.Handler)))),
 		fx.Provide(rpc.NewGRPCServer),
 		fx.Provide(server.NewHTTPServer),
@@ -41,7 +43,7 @@ func main() {
 	).Run()
 }
 
-func registerHooks(lc fx.Lifecycle, s1 *http.Server, s2 *rpc.GRPCServer, c domain.Chain) error {
+func registerHooks(lc fx.Lifecycle, s1 *http.Server, s2 *rpc.GRPCServer) error {
 	lc.Append(
 		fx.Hook{
 			OnStart: func(_ context.Context) error {
@@ -73,11 +75,6 @@ func registerHooks(lc fx.Lifecycle, s1 *http.Server, s2 *rpc.GRPCServer, c domai
 
 				// graceful shutdown gRPC server
 				s2.Shutdown()
-
-				err = c.Shutdown()
-				if err != nil {
-					result = multierr.Append(result, fmt.Errorf("failed to shutdown chain %v", err))
-				}
 
 				return result
 			},

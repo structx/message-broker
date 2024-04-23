@@ -3,10 +3,12 @@ package router
 
 import (
 	"net/http"
+	"time"
 
 	"go.uber.org/zap"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 
 	pkgcontroller "github.com/trevatk/go-pkg/http/controller"
 	"github.com/trevatk/mora/internal/adapter/port/http/controller"
@@ -14,9 +16,16 @@ import (
 )
 
 // NewRouter return new fuego server
-func NewRouter(logger *zap.Logger, auth domain.Authenticator, m domain.Messenger) http.Handler {
+func NewRouter(logger *zap.Logger, auth domain.Authenticator) http.Handler {
 
 	r := chi.NewRouter()
+
+	r.Use(middleware.RequestID)
+	r.Use(middleware.RealIP)
+	r.Use(middleware.Logger)
+	r.Use(middleware.Recoverer)
+
+	r.Use(middleware.Timeout(time.Second * 60))
 
 	cc := []interface{}{
 		pkgcontroller.NewBundle(logger),

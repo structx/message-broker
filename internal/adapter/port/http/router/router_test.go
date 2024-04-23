@@ -13,7 +13,8 @@ import (
 )
 
 func init() {
-	_ = os.Setenv("SERVER_HTTP_PORT", "8080")
+	_ = os.Setenv("LOG_PATH", "router.log")
+	_ = os.Setenv("LOG_LEVEL", "DEBUG")
 }
 
 func Test_NewRouter(t *testing.T) {
@@ -23,15 +24,15 @@ func Test_NewRouter(t *testing.T) {
 
 		ctx := context.TODO()
 
-		logger, err := logging.NewLogger()
+		logger, err := logging.NewLoggerFromEnv()
 		assert.NoError(err)
 
 		cfg := setup.NewConfig()
 		assert.NoError(setup.ProcessConfigWithEnv(ctx, cfg))
 
-		mockMessenger := domain.NewMockMessenger(t)
+		mockAuthenticator := domain.NewMockAuthenticator(t)
 
-		s := router.NewRouter(logger, mockMessenger)
+		s := router.NewRouter(logger, mockAuthenticator)
 		assert.NotNil(s)
 	})
 }

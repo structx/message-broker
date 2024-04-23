@@ -1,13 +1,20 @@
 package middleware
 
-import "net/http"
+import (
+	"net/http"
+)
 
-// Authentication
-type Authentication struct {
+// Auth
+type Auth struct {
+}
+
+// NewAuth
+func NewAuth() *Auth {
+	return &Auth{}
 }
 
 // Authenticate
-func (a *Authentication) Authenticate(next http.Handler) http.Handler {
+func (a *Auth) Authenticate(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 		ctx := r.Context()
