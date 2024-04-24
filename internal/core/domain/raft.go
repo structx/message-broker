@@ -42,4 +42,6 @@ type Raft interface {
 	Notify(ctx context.Context, msg messagebroker.Msg) error
 	// GetState getter raft state
 	GetState() RaftState
+	// GetStartParams getter gRPC start params
+	GetStartParams() *GrpcStartParams
 }

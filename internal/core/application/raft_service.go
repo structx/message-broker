@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/Jille/raft-grpc-leader-rpc/rafterrors"
+	transport "github.com/Jille/raft-grpc-transport"
 	"github.com/hashicorp/raft"
 
 	"github.com/trevatk/mora/internal/adapter/port/raftfx"
@@ -18,7 +19,8 @@ import (
 
 // RaftService implementation of raft interface
 type RaftService struct {
-	r *raft.Raft
+	r  *raft.Raft
+	tm *transport.Manager
 }
 
 // interface compliance
@@ -30,11 +32,12 @@ func NewRaftService(cfg *setup.Config) (*RaftService, error) {
 
 	rs := &RaftService{}
 
-	r, _, err := raftfx.New(cfg, rs)
+	r, tm, err := raftfx.New(cfg, rs)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create new raft %v", err)
 	}
 	rs.r = r
+	rs.tm = tm
 
 	return rs, nil
 }
@@ -106,5 +109,13 @@ func (rs *RaftService) GetState() domain.RaftState {
 		return domain.Leader
 	default:
 		return domain.Follower
+	}
+}
+
+// GetStartParams getter gRPC start params
+func (rs *RaftService) GetStartParams() *domain.GrpcStartParams {
+	return &domain.GrpcStartParams{
+		TransportManager: rs.tm,
+		Raft:             rs.r,
 	}
 }

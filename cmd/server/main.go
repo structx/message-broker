@@ -46,7 +46,7 @@ func main() {
 	).Run()
 }
 
-func registerHooks(lc fx.Lifecycle, s1 *http.Server, s2 *rpc.GRPCServer) error {
+func registerHooks(lc fx.Lifecycle, s1 *http.Server, s2 *rpc.GRPCServer, raftService domain.Raft) error {
 	lc.Append(
 		fx.Hook{
 			OnStart: func(_ context.Context) error {
@@ -59,7 +59,8 @@ func registerHooks(lc fx.Lifecycle, s1 *http.Server, s2 *rpc.GRPCServer) error {
 				}()
 
 				// start gRPC server
-				err := s2.Start()
+				p := raftService.GetStartParams()
+				err := s2.Start(p)
 				if err != nil {
 					return fmt.Errorf("failed to start rpc server %v", err)
 				}

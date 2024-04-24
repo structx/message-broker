@@ -2,6 +2,7 @@
 package raftfx
 
 import (
+	"errors"
 	"fmt"
 	"net"
 	"os"
@@ -87,30 +88,30 @@ func New(config *setup.Config, fsm raft.FSM) (*raft.Raft, *transport.Manager, er
 func mkdirs(baseDir, localID string) (string, error) {
 
 	nd := filepath.Join(baseDir, localID)
-	err := os.Mkdir(nd, 0644)
-	if err != nil && err == os.ErrExist {
-		// do nothing
-	} else if err != nil {
-		return "", fmt.Errorf("failed to create directory %v", err)
+	err := os.Mkdir(filepath.Clean(nd), os.ModePerm)
+	if err != nil {
+		if errors.Is(err, os.ErrExist) {
+			return "", fmt.Errorf("failed to create directory %v", err)
+		}
 	}
 
-	fp1 := filepath.Join("logs.dat")
-	f1, err := os.Create(fp1)
-	if err != nil && err == os.ErrExist {
-		// do nothing
-	} else if err != nil {
-		return "", fmt.Errorf("failed to create file %v", err)
+	fp1 := filepath.Join(nd, "logs.dat")
+	f1, err := os.Create(filepath.Clean(fp1))
+	if err != nil {
+		if errors.Is(err, os.ErrExist) {
+			return "", fmt.Errorf("failed to create file %v", err)
+		}
 	}
-	defer f1.Close()
+	defer func() { _ = f1.Close() }()
 
-	fp2 := filepath.Join("stable.dat")
-	f2, err := os.Create(fp2)
-	if err != nil && err == os.ErrExist {
-		// do nothing
-	} else if err != nil {
-		return "", fmt.Errorf("failed to create file %v", err)
+	fp2 := filepath.Join(nd, "stable.dat")
+	f2, err := os.Create(filepath.Clean(fp2))
+	if err != nil {
+		if errors.Is(err, os.ErrExist) {
+			return "", fmt.Errorf("failed to create file %v", err)
+		}
 	}
-	defer f2.Close()
+	defer func() { _ = f2.Close() }()
 
 	return nd, nil
 }

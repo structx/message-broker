@@ -8,8 +8,11 @@ import (
 	"sync"
 	"time"
 
+	"github.com/Jille/raft-grpc-leader-rpc/leaderhealth"
+	"github.com/Jille/raftadmin"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 
 	pb "github.com/trevatk/go-pkg/proto/messaging/v1"
 	"github.com/trevatk/go-pkg/structs/dht"
@@ -52,7 +55,7 @@ func NewGRPCServer(logger *zap.Logger, cfg *setup.Config, auth domain.Authentica
 func (g *GRPCServer) Publish(ctx context.Context, in *pb.Envelope) (*pb.Stub, error) {
 
 	// notify all nodes in consensus
-	g.r.Notify(ctx, nil)
+	_ = g.r.Notify(ctx, nil)
 
 	// notify all local services subscribed
 	g.mtx.Lock()
@@ -119,17 +122,27 @@ func (g *GRPCServer) RequestResponse(_ context.Context, _ *pb.Envelope) (*pb.Env
 }
 
 // Start gRPC server
-func (g *GRPCServer) Start() error {
+func (g *GRPCServer) Start(params *domain.GrpcStartParams) error {
 
 	pb.RegisterMessagingServiceV1Server(g.s, g)
+	params.TransportManager.Register(g.s)
 
-	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", g.port))
+	leaderhealth.Setup(
+		params.Raft,
+		g.s,
+		[]string{"MessagingService"},
+	)
+
+	raftadmin.Register(g.s, params.Raft)
+	reflection.Register(g.s)
+
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", g.port))
 	if err != nil {
 		return fmt.Errorf("failed to create network listener %v", err)
 	}
 
 	go func() {
-		if err := g.s.Serve(listener); err != nil {
+		if err := g.s.Serve(lis); err != nil {
 			g.log.Fatalf("unable to start gRPC server %v", err)
 		}
 	}()
