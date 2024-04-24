@@ -1,7 +1,6 @@
 package router_test
 
 import (
-	"context"
 	"os"
 	"testing"
 
@@ -13,8 +12,7 @@ import (
 )
 
 func init() {
-	_ = os.Setenv("LOG_PATH", "router.log")
-	_ = os.Setenv("LOG_LEVEL", "DEBUG")
+	_ = os.Setenv("DSERVICE_CONFIG", "./testfiles/test_config.hcl")
 }
 
 func Test_NewRouter(t *testing.T) {
@@ -22,17 +20,16 @@ func Test_NewRouter(t *testing.T) {
 
 		assert := assert.New(t)
 
-		ctx := context.TODO()
-
 		logger, err := logging.NewLoggerFromEnv()
 		assert.NoError(err)
 
 		cfg := setup.NewConfig()
-		assert.NoError(setup.ProcessConfigWithEnv(ctx, cfg))
+		assert.NoError(setup.DecodeHCLConfigFile(cfg))
 
 		mockAuthenticator := domain.NewMockAuthenticator(t)
+		mockRaft := domain.NewMockRaft(t)
 
-		s := router.NewRouter(logger, mockAuthenticator)
+		s := router.NewRouter(logger, mockAuthenticator, mockRaft)
 		assert.NotNil(s)
 	})
 }

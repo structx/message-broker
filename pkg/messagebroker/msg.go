@@ -1,6 +1,7 @@
+// Package messagebroker ...
 package messagebroker
 
-// Msg
+// Msg ...
 type Msg interface {
 	Marshal() ([]byte, error)
 }

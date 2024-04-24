@@ -16,7 +16,7 @@ import (
 )
 
 // NewRouter return new fuego server
-func NewRouter(logger *zap.Logger, auth domain.Authenticator) http.Handler {
+func NewRouter(logger *zap.Logger, auth domain.Authenticator, raft domain.Raft) http.Handler {
 
 	r := chi.NewRouter()
 
@@ -29,7 +29,7 @@ func NewRouter(logger *zap.Logger, auth domain.Authenticator) http.Handler {
 
 	cc := []interface{}{
 		pkgcontroller.NewBundle(logger),
-		controller.NewRaft(logger, nil),
+		controller.NewRaft(logger, raft),
 	}
 
 	v1 := chi.NewRouter()

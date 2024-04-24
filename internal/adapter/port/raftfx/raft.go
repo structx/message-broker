@@ -1,24 +1,32 @@
-package raft
+// Package raftfx hashicorp raft provider
+package raftfx
 
 import (
 	"fmt"
+	"net"
 	"os"
 	"path/filepath"
 
 	transport "github.com/Jille/raft-grpc-transport"
 	"github.com/hashicorp/raft"
 	boltdb "github.com/hashicorp/raft-boltdb"
+
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+
+	"github.com/trevatk/mora/internal/adapter/setup"
 )
 
-// New
-func New(fsm raft.FSM) (*raft.Raft, *transport.Manager, error) {
+// New constructor
+func New(config *setup.Config, fsm raft.FSM) (*raft.Raft, *transport.Manager, error) {
 
 	c := raft.DefaultConfig()
 	c.LocalID = raft.ServerID(config.Raft.LocalID)
 
-	baseDir := filepath.Join(config.Raft.BaseDir, config.Raft.LocalID)
+	baseDir, err := mkdirs(config.Raft.BaseDir, config.Raft.LocalID)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to create directory and files %v", err)
+	}
 
 	logStore, err := boltdb.NewBoltStore(filepath.Join(baseDir, "logs.dat"))
 	if err != nil {
@@ -35,7 +43,12 @@ func New(fsm raft.FSM) (*raft.Raft, *transport.Manager, error) {
 		return nil, nil, fmt.Errorf("failed to create snapstor store %v", err)
 	}
 
-	tm := transport.New(raft.ServerAddress(config.Server.ListenAddr),
+	addr := net.JoinHostPort(
+		config.Server.BindAddr,
+		fmt.Sprintf("%d", config.Server.Ports.GRPC),
+	)
+
+	tm := transport.New(raft.ServerAddress(addr),
 		[]grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())})
 
 	r, err := raft.NewRaft(
@@ -56,7 +69,7 @@ func New(fsm raft.FSM) (*raft.Raft, *transport.Manager, error) {
 				{
 					Suffrage: raft.Voter,
 					ID:       raft.ServerID(config.Raft.LocalID),
-					Address:  raft.ServerAddress(config.Server.ListenAddr),
+					Address:  raft.ServerAddress(addr),
 				},
 			},
 		}
@@ -69,4 +82,35 @@ func New(fsm raft.FSM) (*raft.Raft, *transport.Manager, error) {
 	}
 
 	return r, tm, nil
+}
+
+func mkdirs(baseDir, localID string) (string, error) {
+
+	nd := filepath.Join(baseDir, localID)
+	err := os.Mkdir(nd, 0644)
+	if err != nil && err == os.ErrExist {
+		// do nothing
+	} else if err != nil {
+		return "", fmt.Errorf("failed to create directory %v", err)
+	}
+
+	fp1 := filepath.Join("logs.dat")
+	f1, err := os.Create(fp1)
+	if err != nil && err == os.ErrExist {
+		// do nothing
+	} else if err != nil {
+		return "", fmt.Errorf("failed to create file %v", err)
+	}
+	defer f1.Close()
+
+	fp2 := filepath.Join("stable.dat")
+	f2, err := os.Create(fp2)
+	if err != nil && err == os.ErrExist {
+		// do nothing
+	} else if err != nil {
+		return "", fmt.Errorf("failed to create file %v", err)
+	}
+	defer f2.Close()
+
+	return nd, nil
 }

@@ -22,53 +22,6 @@ func (_m *MockRaft) EXPECT() *MockRaft_Expecter {
 	return &MockRaft_Expecter{mock: &_m.Mock}
 }
 
-// Apply provides a mock function with given fields: ctx, msg
-func (_m *MockRaft) Apply(ctx context.Context, msg messagebroker.Msg) error {
-	ret := _m.Called(ctx, msg)
-
-	if len(ret) == 0 {
-		panic("no return value specified for Apply")
-	}
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, messagebroker.Msg) error); ok {
-		r0 = rf(ctx, msg)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
-// MockRaft_Apply_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Apply'
-type MockRaft_Apply_Call struct {
-	*mock.Call
-}
-
-// Apply is a helper method to define mock.On call
-//   - ctx context.Context
-//   - msg messagebroker.Msg
-func (_e *MockRaft_Expecter) Apply(ctx interface{}, msg interface{}) *MockRaft_Apply_Call {
-	return &MockRaft_Apply_Call{Call: _e.mock.On("Apply", ctx, msg)}
-}
-
-func (_c *MockRaft_Apply_Call) Run(run func(ctx context.Context, msg messagebroker.Msg)) *MockRaft_Apply_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(messagebroker.Msg))
-	})
-	return _c
-}
-
-func (_c *MockRaft_Apply_Call) Return(_a0 error) *MockRaft_Apply_Call {
-	_c.Call.Return(_a0)
-	return _c
-}
-
-func (_c *MockRaft_Apply_Call) RunAndReturn(run func(context.Context, messagebroker.Msg) error) *MockRaft_Apply_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
 // GetState provides a mock function with given fields:
 func (_m *MockRaft) GetState() RaftState {
 	ret := _m.Called()
@@ -169,6 +122,53 @@ func (_c *MockRaft_Join_Call) Return(_a0 *Member, _a1 error) *MockRaft_Join_Call
 }
 
 func (_c *MockRaft_Join_Call) RunAndReturn(run func(context.Context, *NewMember) (*Member, error)) *MockRaft_Join_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// Notify provides a mock function with given fields: ctx, msg
+func (_m *MockRaft) Notify(ctx context.Context, msg messagebroker.Msg) error {
+	ret := _m.Called(ctx, msg)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Notify")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, messagebroker.Msg) error); ok {
+		r0 = rf(ctx, msg)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// MockRaft_Notify_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Notify'
+type MockRaft_Notify_Call struct {
+	*mock.Call
+}
+
+// Notify is a helper method to define mock.On call
+//   - ctx context.Context
+//   - msg messagebroker.Msg
+func (_e *MockRaft_Expecter) Notify(ctx interface{}, msg interface{}) *MockRaft_Notify_Call {
+	return &MockRaft_Notify_Call{Call: _e.mock.On("Notify", ctx, msg)}
+}
+
+func (_c *MockRaft_Notify_Call) Run(run func(ctx context.Context, msg messagebroker.Msg)) *MockRaft_Notify_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(messagebroker.Msg))
+	})
+	return _c
+}
+
+func (_c *MockRaft_Notify_Call) Return(_a0 error) *MockRaft_Notify_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockRaft_Notify_Call) RunAndReturn(run func(context.Context, messagebroker.Msg) error) *MockRaft_Notify_Call {
 	_c.Call.Return(run)
 	return _c
 }

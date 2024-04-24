@@ -1,3 +1,4 @@
+// Package controller exposed http endpoints and models
 package controller
 
 import (
@@ -11,7 +12,7 @@ import (
 	"github.com/trevatk/mora/internal/core/domain"
 )
 
-// Raft
+// Raft controller
 type Raft struct {
 	log *zap.SugaredLogger
 	s   domain.Raft
@@ -20,7 +21,7 @@ type Raft struct {
 // interface compliance
 var _ controller.V1P = (*Raft)(nil)
 
-// NewRaft
+// NewRaft constructor
 func NewRaft(logger *zap.Logger, raftService domain.Raft) *Raft {
 	return &Raft{
 		log: logger.Sugar().Named("RaftController"),
@@ -28,7 +29,7 @@ func NewRaft(logger *zap.Logger, raftService domain.Raft) *Raft {
 	}
 }
 
-// RegisterRoutesV1P
+// RegisterRoutesV1P return router for protected endpoints in raft controller
 func (rc *Raft) RegisterRoutesV1P() http.Handler {
 
 	r := chi.NewRouter()
@@ -38,11 +39,13 @@ func (rc *Raft) RegisterRoutesV1P() http.Handler {
 	return r
 }
 
-// JoinParams
-type JoinParams struct{}
+// JoinRequestParams exposed http model for join handler
+type JoinRequestParams struct{}
 
-// JoinResponse
+// JoinResponse exposed http response model for join handler
 type JoinResponse struct{}
 
-// Join
-func (rc *Raft) Join(w http.ResponseWriter, r *http.Request) {}
+// Join raft handler
+func (rc *Raft) Join(_ http.ResponseWriter, _ *http.Request) {
+	// TODO: implement handler
+}

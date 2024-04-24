@@ -2,24 +2,44 @@
 package setup
 
 import (
-	"context"
+	"errors"
+	"fmt"
+	"os"
+	"path/filepath"
 
-	"github.com/sethvargo/go-envconfig"
+	hcl2 "github.com/hashicorp/hcl/v2/hclsimple"
 )
 
 // Config service configuration
 type Config struct {
-	Server *Server
+	Server Server `hcl:"server,block"`
+	Raft   Raft   `hcl:"raft,block"`
+	Logger Logger `hcl:"logger,block"`
 }
 
-// NewConfig return new config class
+// NewConfig constructor
 func NewConfig() *Config {
 	return &Config{
-		Server: &Server{},
+		Server: Server{},
+		Raft:   Raft{},
 	}
 }
 
-// ProcessConfigWithEnv parse config from environment
-func ProcessConfigWithEnv(ctx context.Context, cfg *Config) error {
-	return envconfig.Process(ctx, cfg)
+// DecodeHCLConfigFile read config path from environment and parse file
+func DecodeHCLConfigFile(cfg *Config) error {
+
+	configFile := os.Getenv("DSERVICE_CONFIG")
+	if configFile == "" {
+		return errors.New("$DSERVICE_CONFIG must be set")
+	}
+
+	if err := hcl2.DecodeFile(
+		filepath.Clean(configFile),
+		nil,
+		cfg,
+	); err != nil {
+		return fmt.Errorf("failed decode config file %v", err)
+	}
+
+	return nil
 }

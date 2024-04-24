@@ -6,6 +6,6 @@ import (
 )
 
 var (
-	// ErrMissingMetadata
+	// ErrMissingMetadata invalid or missing metadata
 	ErrMissingMetadata = status.Error(codes.InvalidArgument, "missing metadata")
 )

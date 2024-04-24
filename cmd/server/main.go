@@ -12,6 +12,7 @@ import (
 	"go.uber.org/multierr"
 	"go.uber.org/zap"
 
+	"github.com/hashicorp/raft"
 	"github.com/trevatk/go-pkg/logging"
 
 	"github.com/trevatk/mora/internal/adapter/port/http/controller"
@@ -21,6 +22,7 @@ import (
 	"github.com/trevatk/mora/internal/adapter/port/rpc"
 	"github.com/trevatk/mora/internal/adapter/port/rpc/interceptor"
 	"github.com/trevatk/mora/internal/adapter/setup"
+	"github.com/trevatk/mora/internal/core/application"
 	"github.com/trevatk/mora/internal/core/domain"
 )
 
@@ -28,8 +30,9 @@ func main() {
 	fx.New(
 		fx.Provide(context.TODO),
 		fx.Provide(setup.NewConfig),
-		fx.Invoke(setup.ProcessConfigWithEnv),
+		fx.Invoke(setup.DecodeHCLConfigFile),
 		fx.Provide(logging.NewLoggerFromEnv),
+		fx.Provide(fx.Annotate(application.NewRaftService, fx.As(new(domain.Raft)), fx.As(new(raft.FSM)))),
 		fx.Provide(fx.Annotate(middleware.NewAuth, fx.As(new(domain.Authenticator)))),
 		fx.Provide(fx.Annotate(interceptor.NewAuth, fx.As(new(domain.AuthenticatorInterceptor)))),
 		fx.Provide(fx.Annotate(router.NewRouter, fx.As(new(http.Handler)))),

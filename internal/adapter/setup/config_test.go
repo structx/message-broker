@@ -1,7 +1,7 @@
 package setup_test
 
 import (
-	"context"
+	"fmt"
 	"os"
 	"testing"
 
@@ -10,7 +10,7 @@ import (
 )
 
 func init() {
-	_ = os.Setenv("KV_DIR", "./testfiles/kv")
+	_ = os.Setenv("ROOT_CONFIG", "./testfiles/test_config.hcl")
 }
 
 func Test_ProcessConfigFromEnv(t *testing.T) {
@@ -19,7 +19,9 @@ func Test_ProcessConfigFromEnv(t *testing.T) {
 		assert := assert.New(t)
 
 		cfg := setup.NewConfig()
-		err := setup.ProcessConfigWithEnv(context.TODO(), cfg)
+		err := setup.DecodeHCLConfigFile(cfg)
 		assert.NoError(err)
+
+		fmt.Println(cfg.Server.BindAddr)
 	})
 }

@@ -1,3 +1,4 @@
+// Package interceptor gRPC request interceptors
 package interceptor
 
 import (
@@ -17,26 +18,26 @@ func newWrappedStream(s grpc.ServerStream) grpc.ServerStream {
 	return &wrappedStream{s}
 }
 
-// RecvMsg
+// RecvMsg ...
 func (w *wrappedStream) RecvMsg(m any) error {
 	return w.ServerStream.RecvMsg(m)
 }
 
-// SendMessage
+// SendMessage ...
 func (w *wrappedStream) SendMsg(m any) error {
 	return w.ServerStream.SendMsg(m)
 }
 
-// Auth
+// Auth interceptor implementation
 type Auth struct{}
 
-// NewAuth
+// NewAuth constructor
 func NewAuth() *Auth {
 	return &Auth{}
 }
 
-// UnaryInterceptor
-func (a *Auth) UnaryInterceptor(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error) {
+// UnaryInterceptor single request interceptor to verify wallet access permissions
+func (a *Auth) UnaryInterceptor(ctx context.Context, req any, _ *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error) {
 
 	_, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
@@ -51,8 +52,8 @@ func (a *Auth) UnaryInterceptor(ctx context.Context, req any, info *grpc.UnarySe
 	return m, nil
 }
 
-// StreamInterceptor
-func (a *Auth) StreamInterceptor(srv any, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
+// StreamInterceptor streaming request interceptor to verify wallet access permissions
+func (a *Auth) StreamInterceptor(srv any, ss grpc.ServerStream, _ *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
 
 	_, ok := metadata.FromIncomingContext(ss.Context())
 	if !ok {

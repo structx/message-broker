@@ -37,12 +37,12 @@ type GRPCServer struct {
 // NewGRPCServer return new gRPC server class
 func NewGRPCServer(logger *zap.Logger, cfg *setup.Config, auth domain.AuthenticatorInterceptor, raft domain.Raft) *GRPCServer {
 	return &GRPCServer{
-		log:       logger.Sugar().Named("grpc_server"),
+		log:       logger.Sugar().Named("GrpcServer"),
 		mtx:       sync.RWMutex{},
 		subs:      make(map[string][]pb.MessagingServiceV1_SubscribeServer),
 		envelopes: make(map[string][]*pb.Envelope),
-		dht:       dht.NewDHT(cfg.Server.Addr),
-		port:      cfg.Server.GRPCPort,
+		dht:       dht.NewDHT(cfg.Server.BindAddr),
+		port:      cfg.Server.Ports.GRPC,
 		r:         raft,
 		s:         grpc.NewServer(grpc.UnaryInterceptor(auth.UnaryInterceptor), grpc.StreamInterceptor(auth.StreamInterceptor)),
 	}
@@ -52,7 +52,7 @@ func NewGRPCServer(logger *zap.Logger, cfg *setup.Config, auth domain.Authentica
 func (g *GRPCServer) Publish(ctx context.Context, in *pb.Envelope) (*pb.Stub, error) {
 
 	// notify all nodes in consensus
-	g.r.Apply(ctx, nil)
+	g.r.Notify(ctx, nil)
 
 	// notify all local services subscribed
 	g.mtx.Lock()

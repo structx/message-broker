@@ -1,19 +1,20 @@
+// Package middleware http router middlewares
 package middleware
 
 import (
 	"net/http"
 )
 
-// Auth
+// Auth middleware implementation
 type Auth struct {
 }
 
-// NewAuth
+// NewAuth constructor
 func NewAuth() *Auth {
 	return &Auth{}
 }
 
-// Authenticate
+// Authenticate http middleware to verify wallet
 func (a *Auth) Authenticate(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 

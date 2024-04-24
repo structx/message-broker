@@ -18,7 +18,7 @@ import (
 )
 
 func init() {
-	_ = os.Setenv("SERVER_GRPC_PORT", "50051")
+	_ = os.Setenv("ROOT_CONFIG", "./testfiles/test_config.hcl")
 }
 
 type GRPCServerSuite struct {
@@ -29,13 +29,12 @@ type GRPCServerSuite struct {
 func (suite *GRPCServerSuite) SetupTest() {
 
 	assert := suite.Assert()
-	ctx := context.TODO()
 
 	logger, err := logging.NewLoggerFromEnv()
 	assert.NoError(err)
 
 	cfg := setup.NewConfig()
-	assert.NoError(setup.ProcessConfigWithEnv(ctx, cfg))
+	assert.NoError(setup.DecodeHCLConfigFile(cfg))
 
 	mockInterceptor := domain.NewMockAuthenticatorInterceptor(suite.T())
 
