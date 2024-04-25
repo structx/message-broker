@@ -1,5 +1,2 @@
-# Block Broker
+# Message Broker
 
-blockchain message broker.
-
-under active development.

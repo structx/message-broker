@@ -12,7 +12,7 @@ FROM gcr.io/distroless/static-debian12
 
 COPY --from=builder /usr/bin/ /app/bin/
 
-VOLUME [ "/var/lib/broker/kv", "/var/log/broker" ]
+VOLUME [ "/var/lib/mora", "/var/log/mora", "/etc/mora.d", "/opt/mora/raft" ]
 
 EXPOSE 2112 8080
 

@@ -3,19 +3,20 @@ package rpc
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"net"
-	"strings"
 	"sync"
 	"time"
 
+	"github.com/Jille/raft-grpc-leader-rpc/leaderhealth"
+	"github.com/Jille/raftadmin"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
+	"google.golang.org/grpc/reflection"
 
 	pb "github.com/trevatk/go-pkg/proto/messaging/v1"
+	"github.com/trevatk/go-pkg/structs/dht"
+
 	"github.com/trevatk/mora/internal/adapter/setup"
 	"github.com/trevatk/mora/internal/core/domain"
 )
@@ -25,71 +26,44 @@ type GRPCServer struct {
 	// server interface compliance
 	pb.UnimplementedMessagingServiceV1Server
 
-	m domain.Messenger
-
-	log *zap.SugaredLogger
-
-	mtx       sync.Mutex
-	subs      sync.Map
-	envelopes sync.Map
+	log       *zap.SugaredLogger
+	dht       *dht.DHT
+	mtx       sync.RWMutex
+	subs      map[string][]pb.MessagingServiceV1_SubscribeServer
+	envelopes map[string][]*pb.Envelope
+	r         domain.Raft
 
 	port int
 	s    *grpc.Server
 }
 
 // NewGRPCServer return new gRPC server class
-func NewGRPCServer(logger *zap.Logger, cfg *setup.Config, messenger domain.Messenger) *GRPCServer {
+func NewGRPCServer(logger *zap.Logger, cfg *setup.Config, auth domain.AuthenticatorInterceptor, raft domain.Raft) *GRPCServer {
 	return &GRPCServer{
-		log:       logger.Sugar().Named("grpc_server"),
-		m:         messenger,
-		mtx:       sync.Mutex{},
-		subs:      sync.Map{},
-		envelopes: sync.Map{},
-		port:      cfg.Server.GRPCPort,
+		log:       logger.Sugar().Named("GrpcServer"),
+		mtx:       sync.RWMutex{},
+		subs:      make(map[string][]pb.MessagingServiceV1_SubscribeServer),
+		envelopes: make(map[string][]*pb.Envelope),
+		dht:       dht.NewDHT(cfg.Server.BindAddr),
+		port:      cfg.Server.Ports.GRPC,
+		r:         raft,
+		s:         grpc.NewServer(grpc.UnaryInterceptor(auth.UnaryInterceptor), grpc.StreamInterceptor(auth.StreamInterceptor)),
 	}
 }
 
 // Publish add message to chain and send message to subscribers
-func (g *GRPCServer) Publish(_ context.Context, in *pb.Envelope) (*pb.Stub, error) {
+func (g *GRPCServer) Publish(ctx context.Context, in *pb.Envelope) (*pb.Stub, error) {
 
-	topic := in.GetTopic()
-	payload := in.GetPayload()
-
-	if topic == "" || !strings.Contains(topic, ".") {
-		return nil, status.Error(codes.InvalidArgument, "invalid topic parameter")
-	}
-
-	// md, ok := metadata.FromIncomingContext(ctx)
-	// if !ok {
-	// 	g.log.Error("invalid metadata provided")
-	// 	return nil, status.Error(codes.InvalidArgument, "invalid metadata provided")
-	// }
-
-	msg, err := g.m.Create(&domain.NewMessage{
-		Topic:     topic,
-		Payload:   payload,
-		Signature: "test",
-	})
-	if err != nil {
-		g.log.Errorf("g.m.Create: %v", err)
-		return nil, status.Error(codes.Internal, "unable to publish message")
-	}
-
-	if v, ok := g.envelopes.LoadOrStore(topic, []*pb.Envelope{}); !ok {
-		// existing map found
-		if envs, ok := v.([]*pb.Envelope); ok {
-			envs = append(envs, in)
-			g.envelopes.Store(topic, envs)
-		}
+	// notify all local services subscribed
+	g.mtx.Lock()
+	defer g.mtx.Unlock()
+	if _, ok := g.envelopes[in.Topic]; !ok {
+		g.envelopes[in.Topic] = []*pb.Envelope{in}
 	} else {
-		// empty map loaded
-		// load first envelope
-		g.envelopes.Store(topic, []*pb.Envelope{in})
+		g.envelopes[in.Topic] = append(g.envelopes[in.Topic], in)
 	}
 
-	return &pb.Stub{
-		EnvelopeId: msg.Hash,
-	}, nil
+	return &pb.Stub{}, nil
 }
 
 // Subscribe store subscription in memory
@@ -97,64 +71,43 @@ func (g *GRPCServer) Subscribe(in *pb.Subscription, stream pb.MessagingServiceV1
 
 	ctx := stream.Context()
 
-	topic := in.GetTopic()
-
-	if err := isValidTopic(topic); err != nil {
-		return status.Error(codes.InvalidArgument, err.Error())
-	}
-
-	if v, ok := g.subs.LoadOrStore(topic, []pb.MessagingServiceV1_SubscribeServer{}); !ok {
-		if subs, ok := v.([]pb.MessagingServiceV1_SubscribeServer); ok {
-			subs = append(subs, stream)
-			g.subs.Store(topic, subs)
-		}
+	g.mtx.Lock()
+	if _, ok := g.subs[in.Topic]; !ok {
+		g.subs[in.Topic] = []pb.MessagingServiceV1_SubscribeServer{stream}
 	} else {
-		g.subs.Store(topic, []pb.MessagingServiceV1_SubscribeServer{stream})
+		g.subs[in.Topic] = append(g.subs[in.Topic], stream)
 	}
+	g.mtx.Unlock()
 
-OUTER:
 	for {
-
 		select {
 		case <-ctx.Done():
-			// TODO:
-			// remove subscriber
+			// client disconnect
+			// remove node from subscribers list
+			for i, s := range g.subs[in.Topic] {
+				if s == stream {
+					g.subs[in.Topic] = removeSubscriber(g.subs[in.Topic], i)
+				}
+			}
 			return nil
 		default:
-
-			v, ok := g.envelopes.Load(topic)
-			if !ok {
-				continue OUTER
-			}
-
-			envs, ok := v.([]*pb.Envelope)
-			if !ok {
-				continue OUTER
-			}
-
-			for _, msg := range envs {
-
-				v, ok := g.subs.Load(topic)
-				if !ok {
-					continue OUTER
-				}
-
-				subs, ok := v.([]pb.MessagingServiceV1_SubscribeServer)
-				if !ok {
-					continue OUTER
-				}
-
-			SUBSCRIPTIONS:
-				for _, sub := range subs {
-					err := sub.Send(msg)
+			for i, m := range g.envelopes[in.Topic] {
+			SUBSCRIBERS:
+				for j, s := range g.subs[in.Topic] {
+					err := s.SendMsg(m)
 					if err != nil {
-						continue SUBSCRIPTIONS
+						// removed errored node
+						g.log.Errorf("failed to send message %v", err)
+						g.subs[in.Topic] = removeSubscriber(g.subs[in.Topic], j)
+						continue SUBSCRIBERS
 					}
 				}
+				g.envelopes[in.Topic] = removeMessage(g.envelopes[in.Topic], i)
 			}
 
 			time.Sleep(time.Millisecond * 200)
 		}
+
 	}
 }
 
@@ -166,18 +119,27 @@ func (g *GRPCServer) RequestResponse(_ context.Context, _ *pb.Envelope) (*pb.Env
 }
 
 // Start gRPC server
-func (g *GRPCServer) Start() error {
+func (g *GRPCServer) Start(params *domain.GrpcStartParams) error {
 
-	g.s = grpc.NewServer()
 	pb.RegisterMessagingServiceV1Server(g.s, g)
+	params.TransportManager.Register(g.s)
 
-	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", g.port))
+	leaderhealth.Setup(
+		params.Raft,
+		g.s,
+		[]string{"MessagingService"},
+	)
+
+	raftadmin.Register(g.s, params.Raft)
+	reflection.Register(g.s)
+
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", g.port))
 	if err != nil {
 		return fmt.Errorf("failed to create network listener %v", err)
 	}
 
 	go func() {
-		if err := g.s.Serve(listener); err != nil {
+		if err := g.s.Serve(lis); err != nil {
 			g.log.Fatalf("unable to start gRPC server %v", err)
 		}
 	}()
@@ -190,13 +152,16 @@ func (g *GRPCServer) Shutdown() {
 	g.s.GracefulStop()
 }
 
-func isValidTopic(topic string) error {
-
-	if len(topic) < 1 {
-		return errors.New("invalid topic length")
-	} else if !strings.Contains(topic, ".") {
-		return errors.New("topic does not contain noun followed by verb")
+func removeMessage(s []*pb.Envelope, index int) []*pb.Envelope {
+	if index < 0 || index >= len(s) {
+		return s
 	}
+	return append(s[:index], s[index+1:]...)
+}
 
-	return nil
+func removeSubscriber(s []pb.MessagingServiceV1_SubscribeServer, index int) []pb.MessagingServiceV1_SubscribeServer {
+	if index < 0 || index >= len(s) {
+		return s
+	}
+	return append(s[:index], s[index+1:]...)
 }

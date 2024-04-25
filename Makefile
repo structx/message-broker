@@ -1,6 +1,6 @@
 
-build:
-	docker build -t trevatk/mora:v0.0.1 -f ./docker/Dockerfile .
+build image:
+	docker build -t trevatk/mora:v0.0.1 .
 
 deps:
 	go mod tidy
@@ -8,3 +8,6 @@ deps:
 
 lint:
 	golangci-lint run ./...
+
+utest:
+	go test -v ./...

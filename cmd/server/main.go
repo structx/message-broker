@@ -12,30 +12,31 @@ import (
 	"go.uber.org/multierr"
 	"go.uber.org/zap"
 
+	"github.com/hashicorp/raft"
 	"github.com/trevatk/go-pkg/logging"
 
-	"github.com/trevatk/mora/internal/adapter/port/http/controller"
+	"github.com/trevatk/mora/internal/adapter/port/http/middleware"
 	"github.com/trevatk/mora/internal/adapter/port/http/router"
 	"github.com/trevatk/mora/internal/adapter/port/http/server"
 	"github.com/trevatk/mora/internal/adapter/port/rpc"
+	"github.com/trevatk/mora/internal/adapter/port/rpc/interceptor"
 	"github.com/trevatk/mora/internal/adapter/setup"
 	"github.com/trevatk/mora/internal/core/application"
-	"github.com/trevatk/mora/internal/core/chain"
 	"github.com/trevatk/mora/internal/core/domain"
 )
 
 func main() {
 	fx.New(
 		fx.Provide(context.TODO),
-		fx.Provide(logging.NewLogger),
 		fx.Provide(setup.NewConfig),
-		fx.Invoke(setup.ProcessConfigWithEnv),
-		fx.Provide(fx.Annotate(chain.NewChain, fx.As(new(domain.Chain)))),
-		fx.Provide(fx.Annotate(application.NewMessagingService, fx.As(new(domain.Messenger)))),
+		fx.Invoke(setup.DecodeHCLConfigFile),
+		fx.Provide(logging.NewLoggerFromEnv),
+		fx.Provide(fx.Annotate(application.NewRaftService, fx.As(new(domain.Raft)), fx.As(new(raft.FSM)))),
+		fx.Provide(fx.Annotate(middleware.NewAuth, fx.As(new(domain.Authenticator)))),
+		fx.Provide(fx.Annotate(interceptor.NewAuth, fx.As(new(domain.AuthenticatorInterceptor)))),
 		fx.Provide(fx.Annotate(router.NewRouter, fx.As(new(http.Handler)))),
 		fx.Provide(rpc.NewGRPCServer),
 		fx.Provide(server.NewHTTPServer),
-		fx.Invoke(controller.InvokeMetricsController),
 		fx.Invoke(registerHooks),
 		fx.WithLogger(func(log *zap.Logger) fxevent.Logger {
 			return &fxevent.ZapLogger{Logger: log}
@@ -43,7 +44,7 @@ func main() {
 	).Run()
 }
 
-func registerHooks(lc fx.Lifecycle, s1 *http.Server, s2 *rpc.GRPCServer, c domain.Chain) error {
+func registerHooks(lc fx.Lifecycle, s1 *http.Server, s2 *rpc.GRPCServer, raftService domain.Raft) error {
 	lc.Append(
 		fx.Hook{
 			OnStart: func(_ context.Context) error {
@@ -56,7 +57,8 @@ func registerHooks(lc fx.Lifecycle, s1 *http.Server, s2 *rpc.GRPCServer, c domai
 				}()
 
 				// start gRPC server
-				err := s2.Start()
+				p := raftService.GetStartParams()
+				err := s2.Start(p)
 				if err != nil {
 					return fmt.Errorf("failed to start rpc server %v", err)
 				}
@@ -75,11 +77,6 @@ func registerHooks(lc fx.Lifecycle, s1 *http.Server, s2 *rpc.GRPCServer, c domai
 
 				// graceful shutdown gRPC server
 				s2.Shutdown()
-
-				err = c.Shutdown()
-				if err != nil {
-					result = multierr.Append(result, fmt.Errorf("failed to shutdown chain %v", err))
-				}
 
 				return result
 			},

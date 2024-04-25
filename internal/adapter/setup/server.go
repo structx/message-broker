@@ -1,7 +1,13 @@
 package setup
 
+// Ports server nested block configuration
+type Ports struct {
+	HTTP int `hcl:"http"`
+	GRPC int `hcl:"grpc"`
+}
+
 // Server configuration
 type Server struct {
-	HTTPPort string `env:"SERVER_HTTP_PORT"`
-	GRPCPort int    `env:"SERVER_GRPC_PORT"`
+	BindAddr string `hcl:"bind_addr"`
+	Ports    Ports  `hcl:"ports,block"`
 }
