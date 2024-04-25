@@ -7,6 +7,7 @@ require (
 	github.com/Jille/raft-grpc-transport v1.5.0
 	github.com/Jille/raftadmin v1.2.1
 	github.com/go-chi/chi/v5 v5.0.12
+	github.com/go-chi/render v1.0.3
 	github.com/hashicorp/hcl/v2 v2.20.1
 	github.com/hashicorp/raft v1.6.1
 	github.com/hashicorp/raft-boltdb v0.0.0-20171010151810-6e5ba93211ea
@@ -21,6 +22,7 @@ require (
 
 require (
 	github.com/agext/levenshtein v1.2.1 // indirect
+	github.com/ajg/form v1.5.1 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
 	github.com/armon/go-metrics v0.4.1 // indirect

@@ -54,9 +54,6 @@ func NewGRPCServer(logger *zap.Logger, cfg *setup.Config, auth domain.Authentica
 // Publish add message to chain and send message to subscribers
 func (g *GRPCServer) Publish(ctx context.Context, in *pb.Envelope) (*pb.Stub, error) {
 
-	// notify all nodes in consensus
-	_ = g.r.Notify(ctx, nil)
-
 	// notify all local services subscribed
 	g.mtx.Lock()
 	defer g.mtx.Unlock()

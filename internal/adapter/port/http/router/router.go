@@ -30,6 +30,7 @@ func NewRouter(logger *zap.Logger, auth domain.Authenticator, raft domain.Raft) 
 	cc := []interface{}{
 		pkgcontroller.NewBundle(logger),
 		controller.NewRaft(logger, raft),
+		controller.Metrics{}, // move to pkg bundle controller
 	}
 
 	v1 := chi.NewRouter()

@@ -15,7 +15,6 @@ import (
 	"github.com/hashicorp/raft"
 	"github.com/trevatk/go-pkg/logging"
 
-	"github.com/trevatk/mora/internal/adapter/port/http/controller"
 	"github.com/trevatk/mora/internal/adapter/port/http/middleware"
 	"github.com/trevatk/mora/internal/adapter/port/http/router"
 	"github.com/trevatk/mora/internal/adapter/port/http/server"
@@ -38,7 +37,6 @@ func main() {
 		fx.Provide(fx.Annotate(router.NewRouter, fx.As(new(http.Handler)))),
 		fx.Provide(rpc.NewGRPCServer),
 		fx.Provide(server.NewHTTPServer),
-		fx.Invoke(controller.InvokeMetricsController),
 		fx.Invoke(registerHooks),
 		fx.WithLogger(func(log *zap.Logger) fxevent.Logger {
 			return &fxevent.ZapLogger{Logger: log}
