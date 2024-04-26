@@ -10,7 +10,7 @@ job "mora" {
         network {
             mode = "bridge"
 
-            port "api" {}
+            port "http" {}
 
             port "rpc" {}
 
@@ -20,8 +20,8 @@ job "mora" {
         }
 
         service {
-            name = "mora-api" 
-            port = "api"
+            name = "mora-http-api" 
+            port = "http"
 
             connect {
                 sidecar_service {}
@@ -57,35 +57,54 @@ job "mora" {
             }
         }
 
-        template {
-            data = << EOH
-            server {
-                bind_addr = "{{ env 'NOMAD_UPSTREAM_ADDR_rpc' }}"
-                advertise_addr = ""
-
-                ports {
-                    http = "${NOMAD_PORT_api}"
-                    grpc = "${NOMAD_PORT_rpc}"
-                }
-            }
-
-            raft {}
-            EOH
-            destination = "/etc/mora/config.hcl"
-        }
-
         task "server" {
             driver = "docker"
 
             config {
                 image = "trevatk/mora:v0.0.1"
-                ports = [ "api", "rpc", "metrics" ]
+                ports = [ "http", "rpc", "metrics" ]
             }
 
             env {
-                SERVER_HTTP_PORT = "${NOMAD_PORT_api}"
-                SERVER_GRPC_PORT = "${NOMAD_PORT_rpc}"
+                DSERVICE_CONFIG = "${NOMAD_TASK_DIR}/config.hcl"
             }
+
+            template {
+                destination = "local/config.hcl"
+                change_mode = "signal"
+                change_signal = "SIGTERM"
+                data = <<EOH
+server {
+    bind_addr = "0.0.0.0"
+
+    ports {
+        http = {{ env "NOMAD_PORT_http"}}
+        grpc = {{ env "NOMAD_PORT_rpc" }}
+    }
+}
+
+raft {
+    bootstrap = true
+    local_id = "1234567789012345456"
+    base_dir = "/opt/mora/raft"
+}
+
+logger {
+    log_path = "/var/log/mora/node.log"
+    log_level = "DEBUG"
+    raft_log_path = "/var/log/mora"
+}
+
+chain {
+    base_dir = ""
+}
+
+message_broker {
+    server_addr = ""
+}
+                EOH
+            }
+
         }
     }
 }

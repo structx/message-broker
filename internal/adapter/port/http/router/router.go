@@ -10,7 +10,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 
-	pkgcontroller "github.com/trevatk/go-pkg/http/controller"
+	pkgcontroller "github.com/trevatk/go-pkg/adapter/port/http/controller"
 	"github.com/trevatk/mora/internal/adapter/port/http/controller"
 	"github.com/trevatk/mora/internal/core/domain"
 )
@@ -30,7 +30,6 @@ func NewRouter(logger *zap.Logger, auth domain.Authenticator, raft domain.Raft) 
 	cc := []interface{}{
 		pkgcontroller.NewBundle(logger),
 		controller.NewRaft(logger, raft),
-		controller.Metrics{}, // move to pkg bundle controller
 	}
 
 	v1 := chi.NewRouter()
@@ -50,14 +49,14 @@ func NewRouter(logger *zap.Logger, auth domain.Authenticator, raft domain.Raft) 
 			v1.Mount("/", h)
 		}
 
-		if c1p, ok := c.(pkgcontroller.V1); ok {
-			h := c1p.RegisterRoutesV1()
+		if c1p, ok := c.(pkgcontroller.V1P); ok {
+			h := c1p.RegisterRoutesV1P()
 			v1p.Mount("/", h)
 		}
 	}
 
 	r.Mount("/api/v1", v1)
-	r.Mount("/api/v1/protected", v1p)
+	r.Mount("/protected/api/v1", v1p)
 
 	return r
 }

@@ -12,8 +12,8 @@ FROM gcr.io/distroless/static-debian12
 
 COPY --from=builder /usr/bin/ /app/bin/
 
-VOLUME [ "/var/lib/mora", "/var/log/mora", "/etc/mora.d", "/opt/mora/raft" ]
+VOLUME [ "/var/lib/mora", "/var/log/mora", "/local/mora", "/opt/mora/raft" ]
 
-EXPOSE 2112 8080
+EXPOSE 50051 8080
 
 ENTRYPOINT [ "/app/bin/server" ]

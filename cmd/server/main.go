@@ -8,39 +8,36 @@ import (
 	"net/http"
 
 	"go.uber.org/fx"
-	"go.uber.org/fx/fxevent"
 	"go.uber.org/multierr"
-	"go.uber.org/zap"
 
 	"github.com/hashicorp/raft"
-	"github.com/trevatk/go-pkg/logging"
+
+	"github.com/trevatk/go-pkg/adapter/logging"
+	"github.com/trevatk/go-pkg/adapter/setup"
+	pkgdomain "github.com/trevatk/go-pkg/domain"
+	"github.com/trevatk/go-pkg/util/decode"
 
 	"github.com/trevatk/mora/internal/adapter/port/http/middleware"
 	"github.com/trevatk/mora/internal/adapter/port/http/router"
 	"github.com/trevatk/mora/internal/adapter/port/http/server"
 	"github.com/trevatk/mora/internal/adapter/port/rpc"
 	"github.com/trevatk/mora/internal/adapter/port/rpc/interceptor"
-	"github.com/trevatk/mora/internal/adapter/setup"
-	"github.com/trevatk/mora/internal/core/application"
 	"github.com/trevatk/mora/internal/core/domain"
+	"github.com/trevatk/mora/internal/core/service"
 )
 
 func main() {
 	fx.New(
-		fx.Provide(context.TODO),
-		fx.Provide(setup.NewConfig),
-		fx.Invoke(setup.DecodeHCLConfigFile),
-		fx.Provide(logging.NewLoggerFromEnv),
-		fx.Provide(fx.Annotate(application.NewRaftService, fx.As(new(domain.Raft)), fx.As(new(raft.FSM)))),
+		fx.Provide(fx.Annotate(setup.New, fx.As(new(pkgdomain.Config)))),
+		fx.Invoke(decode.ConfigFromEnv),
+		fx.Provide(logging.New),
+		fx.Provide(fx.Annotate(service.NewRaftService, fx.As(new(domain.Raft)), fx.As(new(raft.FSM)))),
 		fx.Provide(fx.Annotate(middleware.NewAuth, fx.As(new(domain.Authenticator)))),
 		fx.Provide(fx.Annotate(interceptor.NewAuth, fx.As(new(domain.AuthenticatorInterceptor)))),
 		fx.Provide(fx.Annotate(router.NewRouter, fx.As(new(http.Handler)))),
 		fx.Provide(rpc.NewGRPCServer),
 		fx.Provide(server.NewHTTPServer),
 		fx.Invoke(registerHooks),
-		fx.WithLogger(func(log *zap.Logger) fxevent.Logger {
-			return &fxevent.ZapLogger{Logger: log}
-		}),
 	).Run()
 }
 

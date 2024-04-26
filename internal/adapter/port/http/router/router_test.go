@@ -5,9 +5,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/trevatk/go-pkg/logging"
+	"github.com/trevatk/go-pkg/adapter/logging"
 	"github.com/trevatk/mora/internal/adapter/port/http/router"
-	"github.com/trevatk/mora/internal/adapter/setup"
 	"github.com/trevatk/mora/internal/core/domain"
 )
 
@@ -20,11 +19,8 @@ func Test_NewRouter(t *testing.T) {
 
 		assert := assert.New(t)
 
-		logger, err := logging.NewLoggerFromEnv()
+		logger, err := logging.New(nil)
 		assert.NoError(err)
-
-		cfg := setup.NewConfig()
-		assert.NoError(setup.DecodeHCLConfigFile(cfg))
 
 		mockAuthenticator := domain.NewMockAuthenticator(t)
 		mockRaft := domain.NewMockRaft(t)

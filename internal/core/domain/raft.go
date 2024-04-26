@@ -4,7 +4,7 @@ package domain
 import (
 	"context"
 
-	"github.com/trevatk/mora/pkg/messagebroker"
+	pkgdomain "github.com/trevatk/go-pkg/domain"
 )
 
 // RaftState current raft state
@@ -39,7 +39,7 @@ type Raft interface {
 	// Join raft
 	Join(context.Context, *NewMember) (*Member, error)
 	// Notify nodes in consensus
-	Notify(ctx context.Context, msg messagebroker.Msg) error
+	Notify(ctx context.Context, msg pkgdomain.Envelope) error
 	// GetState getter raft state
 	GetState() RaftState
 	// GetStartParams getter gRPC start params

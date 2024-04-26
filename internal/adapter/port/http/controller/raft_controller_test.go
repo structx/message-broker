@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/trevatk/go-pkg/logging"
+	"github.com/trevatk/go-pkg/adapter/logging"
 
 	"github.com/trevatk/mora/internal/adapter/port/http/controller"
 	"github.com/trevatk/mora/internal/core/domain"
@@ -32,7 +32,7 @@ func (suite *RaftControllerSuite) SetupTest() {
 
 	assert := suite.Assert()
 
-	logger, err := logging.NewLoggerFromEnv()
+	logger, err := logging.New(nil)
 	assert.NoError(err)
 
 	mockRaft := domain.NewMockRaft(suite.T())
