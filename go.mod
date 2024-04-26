@@ -6,7 +6,6 @@ require go.uber.org/fx v1.21.1
 
 require (
 	github.com/Jille/raftadmin v1.2.1
-	github.com/hashicorp/hcl/v2 v2.20.1
 	github.com/trevatk/go-pkg v0.0.6
 )
 
@@ -30,6 +29,7 @@ require (
 	github.com/hashicorp/go-msgpack/v2 v2.1.1 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hashicorp/golang-lru v1.0.2 // indirect
+	github.com/hashicorp/hcl/v2 v2.20.1 // indirect
 	github.com/hashicorp/raft-boltdb v0.0.0-20231211162105-6c830fa4535e // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.19 // indirect

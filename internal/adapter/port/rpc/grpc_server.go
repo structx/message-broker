@@ -53,7 +53,7 @@ func NewGRPCServer(logger *zap.Logger, cfg pkgdomain.Config, auth domain.Authent
 }
 
 // Publish add message to chain and send message to subscribers
-func (g *GRPCServer) Publish(ctx context.Context, in *pb.Envelope) (*pb.Stub, error) {
+func (g *GRPCServer) Publish(_ context.Context, in *pb.Envelope) (*pb.Stub, error) {
 
 	// notify all local services subscribed
 	g.mtx.Lock()
