@@ -1,5 +1,5 @@
-// Package application logic
-package application
+// Package service application logic
+package service
 
 import (
 	"context"
@@ -11,10 +11,9 @@ import (
 	transport "github.com/Jille/raft-grpc-transport"
 	"github.com/hashicorp/raft"
 
-	"github.com/trevatk/mora/internal/adapter/port/raftfx"
-	"github.com/trevatk/mora/internal/adapter/setup"
+	"github.com/trevatk/go-pkg/adapter/port/raftfx"
+	pkgdomain "github.com/trevatk/go-pkg/domain"
 	"github.com/trevatk/mora/internal/core/domain"
-	"github.com/trevatk/mora/pkg/messagebroker"
 )
 
 // RaftService implementation of raft interface
@@ -28,7 +27,7 @@ var _ domain.Raft = (*RaftService)(nil)
 var _ raft.FSM = (*RaftService)(nil)
 
 // NewRaftService constructor
-func NewRaftService(cfg *setup.Config) (*RaftService, error) {
+func NewRaftService(cfg pkgdomain.Config) (*RaftService, error) {
 
 	rs := &RaftService{}
 
@@ -68,18 +67,14 @@ func (rs *RaftService) Join(_ context.Context, nm *domain.NewMember) (*domain.Me
 }
 
 // Notify all nodes in consensus of new message
-func (rs *RaftService) Notify(_ context.Context, msg messagebroker.Msg) error {
+func (rs *RaftService) Notify(_ context.Context, msg pkgdomain.Envelope) error {
 
-	msgbytes, err := msg.Marshal()
-	if err != nil {
-		return fmt.Errorf("to marshal message %v", err)
-	}
-
-	f := rs.r.Apply(msgbytes, time.Second)
-	err = f.Error()
+	f := rs.r.Apply(msg.GetPayload(), time.Second)
+	err := f.Error()
 	if err != nil {
 		return rafterrors.MarkRetriable(err)
 	}
+
 	return nil
 }
 

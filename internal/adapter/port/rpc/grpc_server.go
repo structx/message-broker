@@ -17,7 +17,7 @@ import (
 	pb "github.com/trevatk/go-pkg/proto/messaging/v1"
 	"github.com/trevatk/go-pkg/structs/dht"
 
-	"github.com/trevatk/mora/internal/adapter/setup"
+	pkgdomain "github.com/trevatk/go-pkg/domain"
 	"github.com/trevatk/mora/internal/core/domain"
 )
 
@@ -38,14 +38,15 @@ type GRPCServer struct {
 }
 
 // NewGRPCServer return new gRPC server class
-func NewGRPCServer(logger *zap.Logger, cfg *setup.Config, auth domain.AuthenticatorInterceptor, raft domain.Raft) *GRPCServer {
+func NewGRPCServer(logger *zap.Logger, cfg pkgdomain.Config, auth domain.AuthenticatorInterceptor, raft domain.Raft) *GRPCServer {
+	scfg := cfg.GetServer()
 	return &GRPCServer{
 		log:       logger.Sugar().Named("GrpcServer"),
 		mtx:       sync.RWMutex{},
 		subs:      make(map[string][]pb.MessagingServiceV1_SubscribeServer),
 		envelopes: make(map[string][]*pb.Envelope),
-		dht:       dht.NewDHT(cfg.Server.BindAddr),
-		port:      cfg.Server.Ports.GRPC,
+		dht:       dht.NewDHT(net.JoinHostPort(scfg.BindAddr, fmt.Sprintf("%d", scfg.Ports.GRPC))),
+		port:      scfg.Ports.GRPC,
 		r:         raft,
 		s:         grpc.NewServer(grpc.UnaryInterceptor(auth.UnaryInterceptor), grpc.StreamInterceptor(auth.StreamInterceptor)),
 	}

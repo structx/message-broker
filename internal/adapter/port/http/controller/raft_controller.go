@@ -10,7 +10,7 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/trevatk/go-pkg/http/controller"
+	"github.com/trevatk/go-pkg/adapter/port/http/controller"
 	"github.com/trevatk/mora/internal/core/domain"
 )
 

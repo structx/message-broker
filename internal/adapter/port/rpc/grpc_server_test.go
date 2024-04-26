@@ -10,10 +10,11 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/trevatk/go-pkg/logging"
+	"github.com/trevatk/go-pkg/adapter/logging"
+	"github.com/trevatk/go-pkg/adapter/setup"
 	pb "github.com/trevatk/go-pkg/proto/messaging/v1"
+	"github.com/trevatk/go-pkg/util/decode"
 	"github.com/trevatk/mora/internal/adapter/port/rpc"
-	"github.com/trevatk/mora/internal/adapter/setup"
 	"github.com/trevatk/mora/internal/core/domain"
 )
 
@@ -30,11 +31,11 @@ func (suite *GRPCServerSuite) SetupTest() {
 
 	assert := suite.Assert()
 
-	logger, err := logging.NewLoggerFromEnv()
+	logger, err := logging.New(nil)
 	assert.NoError(err)
 
-	cfg := setup.NewConfig()
-	assert.NoError(setup.DecodeHCLConfigFile(cfg))
+	cfg := setup.New()
+	assert.NoError(decode.ConfigFromEnv(cfg))
 
 	mockInterceptor := domain.NewMockAuthenticatorInterceptor(suite.T())
 

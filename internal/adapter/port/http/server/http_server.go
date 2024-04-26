@@ -7,13 +7,14 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/trevatk/mora/internal/adapter/setup"
+	pkgdomain "github.com/trevatk/go-pkg/domain"
 )
 
 // NewHTTPServer return new http server
-func NewHTTPServer(cfg *setup.Config, handler http.Handler) *http.Server {
+func NewHTTPServer(cfg pkgdomain.Config, handler http.Handler) *http.Server {
+	scfg := cfg.GetServer()
 	return &http.Server{
-		Addr:         net.JoinHostPort(cfg.Server.BindAddr, fmt.Sprintf("%d", cfg.Server.Ports.HTTP)),
+		Addr:         net.JoinHostPort(scfg.BindAddr, fmt.Sprintf("%d", scfg.Ports.HTTP)),
 		Handler:      handler,
 		ReadTimeout:  time.Second * 15,
 		WriteTimeout: time.Second * 15,
