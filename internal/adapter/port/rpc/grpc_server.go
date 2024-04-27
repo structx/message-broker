@@ -149,7 +149,7 @@ func (g *GRPCServer) RequestResponse(ctx context.Context, in *pb.Envelope) (*pb.
 		g.log.Errorf("failed to dial addr %v", err)
 		return nil, status.Errorf(codes.Internal, "unable to dial requested service")
 	}
-	defer conn.Close()
+	defer func() { _ = conn.Close() }()
 
 	// publish request with altered topic
 	cli := pb.NewMessagingServiceV1Client(conn)
