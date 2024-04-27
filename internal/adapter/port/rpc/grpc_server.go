@@ -12,7 +12,11 @@ import (
 	"github.com/Jille/raftadmin"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/peer"
 	"google.golang.org/grpc/reflection"
+	"google.golang.org/grpc/status"
 
 	pb "github.com/trevatk/go-pkg/proto/messaging/v1"
 	"github.com/trevatk/go-pkg/structs/dht"
@@ -27,7 +31,7 @@ type GRPCServer struct {
 	pb.UnimplementedMessagingServiceV1Server
 
 	log       *zap.SugaredLogger
-	dht       *dht.DHT
+	dht       map[string]*dht.DHT
 	mtx       sync.RWMutex
 	subs      map[string][]pb.MessagingServiceV1_SubscribeServer
 	envelopes map[string][]*pb.Envelope
@@ -45,7 +49,7 @@ func NewGRPCServer(logger *zap.Logger, cfg pkgdomain.Config, auth domain.Authent
 		mtx:       sync.RWMutex{},
 		subs:      make(map[string][]pb.MessagingServiceV1_SubscribeServer),
 		envelopes: make(map[string][]*pb.Envelope),
-		dht:       dht.NewDHT(net.JoinHostPort(scfg.BindAddr, fmt.Sprintf("%d", scfg.Ports.GRPC))),
+		dht:       make(map[string]*dht.DHT),
 		port:      scfg.Ports.GRPC,
 		r:         raft,
 		s:         grpc.NewServer(grpc.UnaryInterceptor(auth.UnaryInterceptor), grpc.StreamInterceptor(auth.StreamInterceptor)),
@@ -71,6 +75,18 @@ func (g *GRPCServer) Publish(_ context.Context, in *pb.Envelope) (*pb.Stub, erro
 func (g *GRPCServer) Subscribe(in *pb.Subscription, stream pb.MessagingServiceV1_SubscribeServer) error {
 
 	ctx := stream.Context()
+
+	p, ok := peer.FromContext(ctx)
+	if !ok {
+		return status.Errorf(codes.InvalidArgument, "missing peer data")
+	}
+
+	n := dht.NewNode(p.Addr.String())
+	err := g.dht[in.Topic].AddNode(n)
+	if err != nil {
+		g.log.Errorf("failed to add node to DHT %v", err)
+		return status.Errorf(codes.Internal, "unable to add node to DHT")
+	}
 
 	g.mtx.Lock()
 	if _, ok := g.subs[in.Topic]; !ok {
@@ -113,10 +129,37 @@ func (g *GRPCServer) Subscribe(in *pb.Subscription, stream pb.MessagingServiceV1
 }
 
 // RequestResponse message handler
-func (g *GRPCServer) RequestResponse(_ context.Context, _ *pb.Envelope) (*pb.Envelope, error) {
-	// TODO:
-	// implement handler
-	return nil, nil
+func (g *GRPCServer) RequestResponse(ctx context.Context, in *pb.Envelope) (*pb.Envelope, error) {
+
+	// find closest node in topic
+	dht := g.dht[in.Topic]
+	n, err := dht.Put([]byte(in.Topic))
+	if err != nil {
+		g.log.Errorf("failed to resolve key %v", err)
+		return nil, status.Errorf(codes.Internal, "no nodes exist")
+	}
+
+	// set s2s timeout
+	timeout, cancel := context.WithTimeout(ctx, time.Millisecond*200)
+	defer cancel()
+
+	// dial closest node
+	conn, err := grpc.DialContext(timeout, n.Addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		g.log.Errorf("failed to dial addr %v", err)
+		return nil, status.Errorf(codes.Internal, "unable to dial requested service")
+	}
+	defer conn.Close()
+
+	// publish request with altered topic
+	cli := pb.NewMessagingServiceV1Client(conn)
+	result, err := cli.RequestResponse(ctx, in)
+	if err != nil {
+		g.log.Errorf("failed to send request/response to node %v", err)
+
+	}
+
+	return result, nil
 }
 
 // Start gRPC server
