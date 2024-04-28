@@ -17,11 +17,9 @@ import (
 	pkgdomain "github.com/trevatk/go-pkg/domain"
 	"github.com/trevatk/go-pkg/util/decode"
 
-	"github.com/trevatk/mora/internal/adapter/port/http/middleware"
 	"github.com/trevatk/mora/internal/adapter/port/http/router"
 	"github.com/trevatk/mora/internal/adapter/port/http/server"
 	"github.com/trevatk/mora/internal/adapter/port/rpc"
-	"github.com/trevatk/mora/internal/adapter/port/rpc/interceptor"
 	"github.com/trevatk/mora/internal/core/domain"
 	"github.com/trevatk/mora/internal/core/service"
 )
@@ -32,8 +30,6 @@ func main() {
 		fx.Invoke(decode.ConfigFromEnv),
 		fx.Provide(logging.New),
 		fx.Provide(fx.Annotate(service.NewRaftService, fx.As(new(domain.Raft)), fx.As(new(raft.FSM)))),
-		fx.Provide(fx.Annotate(middleware.NewAuth, fx.As(new(domain.Authenticator)))),
-		fx.Provide(fx.Annotate(interceptor.NewAuth, fx.As(new(domain.AuthenticatorInterceptor)))),
 		fx.Provide(fx.Annotate(router.NewRouter, fx.As(new(http.Handler)))),
 		fx.Provide(rpc.NewGRPCServer),
 		fx.Provide(server.NewHTTPServer),
