@@ -2,7 +2,6 @@
 package router
 
 import (
-	"net/http"
 	"time"
 
 	"go.uber.org/zap"
@@ -11,12 +10,13 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 
 	pkgcontroller "github.com/trevatk/go-pkg/adapter/port/http/controller"
+
 	"github.com/trevatk/mora/internal/adapter/port/http/controller"
 	"github.com/trevatk/mora/internal/core/domain"
 )
 
-// NewRouter return new fuego server
-func NewRouter(logger *zap.Logger, auth domain.Authenticator, raft domain.Raft) http.Handler {
+// NewRouter return new chi router
+func NewRouter(logger *zap.Logger, raft domain.Raft) *chi.Mux {
 
 	r := chi.NewRouter()
 
@@ -33,9 +33,6 @@ func NewRouter(logger *zap.Logger, auth domain.Authenticator, raft domain.Raft) 
 	}
 
 	v1 := chi.NewRouter()
-	v1p := chi.NewRouter()
-
-	v1p.Use(auth.Authenticate)
 
 	for _, c := range cc {
 
@@ -49,14 +46,9 @@ func NewRouter(logger *zap.Logger, auth domain.Authenticator, raft domain.Raft) 
 			v1.Mount("/", h)
 		}
 
-		if c1p, ok := c.(pkgcontroller.V1P); ok {
-			h := c1p.RegisterRoutesV1P()
-			v1p.Mount("/", h)
-		}
 	}
 
 	r.Mount("/api/v1", v1)
-	r.Mount("/protected/api/v1", v1p)
 
 	return r
 }

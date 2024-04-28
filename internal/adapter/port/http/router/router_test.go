@@ -22,10 +22,9 @@ func Test_NewRouter(t *testing.T) {
 		logger, err := logging.New(nil)
 		assert.NoError(err)
 
-		mockAuthenticator := domain.NewMockAuthenticator(t)
 		mockRaft := domain.NewMockRaft(t)
 
-		s := router.NewRouter(logger, mockAuthenticator, mockRaft)
+		s := router.NewRouter(logger, mockRaft)
 		assert.NotNil(s)
 	})
 }

@@ -37,11 +37,9 @@ func (suite *GRPCServerSuite) SetupTest() {
 	cfg := setup.New()
 	assert.NoError(decode.ConfigFromEnv(cfg))
 
-	mockInterceptor := domain.NewMockAuthenticatorInterceptor(suite.T())
-
 	mockRaft := domain.NewMockRaft(suite.T())
 
-	suite.s = rpc.NewGRPCServer(logger, cfg, mockInterceptor, mockRaft)
+	suite.s = rpc.NewGRPCServer(logger, cfg, mockRaft)
 }
 
 func (suite *GRPCServerSuite) TestPublish() {

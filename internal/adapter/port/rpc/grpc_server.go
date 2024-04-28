@@ -42,7 +42,7 @@ type GRPCServer struct {
 }
 
 // NewGRPCServer return new gRPC server class
-func NewGRPCServer(logger *zap.Logger, cfg pkgdomain.Config, auth domain.AuthenticatorInterceptor, raft domain.Raft) *GRPCServer {
+func NewGRPCServer(logger *zap.Logger, cfg pkgdomain.Config, raft domain.Raft) *GRPCServer {
 	scfg := cfg.GetServer()
 	return &GRPCServer{
 		log:       logger.Sugar().Named("GrpcServer"),
@@ -52,7 +52,7 @@ func NewGRPCServer(logger *zap.Logger, cfg pkgdomain.Config, auth domain.Authent
 		dht:       make(map[string]*dht.DHT),
 		port:      scfg.Ports.GRPC,
 		r:         raft,
-		s:         grpc.NewServer(grpc.UnaryInterceptor(auth.UnaryInterceptor), grpc.StreamInterceptor(auth.StreamInterceptor)),
+		s:         grpc.NewServer(),
 	}
 }
 
