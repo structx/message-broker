@@ -11,9 +11,9 @@ import (
 	transport "github.com/Jille/raft-grpc-transport"
 	"github.com/hashicorp/raft"
 
-	"github.com/trevatk/go-pkg/adapter/port/raftfx"
-	pkgdomain "github.com/trevatk/go-pkg/domain"
-	"github.com/trevatk/mora/internal/core/domain"
+	"github.com/structx/go-pkg/adapter/port/raftfx"
+	pkgdomain "github.com/structx/go-pkg/domain"
+	"github.com/structx/message-broker/internal/core/domain"
 )
 
 // RaftService implementation of raft interface

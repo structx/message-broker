@@ -18,11 +18,11 @@ import (
 	"google.golang.org/grpc/reflection"
 	"google.golang.org/grpc/status"
 
-	pb "github.com/trevatk/go-pkg/proto/messaging/v1"
-	"github.com/trevatk/go-pkg/structs/dht"
+	pb "github.com/structx/go-pkg/proto/messaging/v1"
+	"github.com/structx/go-pkg/structs/dht"
 
-	pkgdomain "github.com/trevatk/go-pkg/domain"
-	"github.com/trevatk/mora/internal/core/domain"
+	pkgdomain "github.com/structx/go-pkg/domain"
+	"github.com/structx/message-broker/internal/core/domain"
 )
 
 // GRPCServer implementation of messaging service gRPC interface

@@ -9,10 +9,10 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 
-	pkgcontroller "github.com/trevatk/go-pkg/adapter/port/http/controller"
+	pkgcontroller "github.com/structx/go-pkg/adapter/port/http/controller"
 
-	"github.com/trevatk/mora/internal/adapter/port/http/controller"
-	"github.com/trevatk/mora/internal/core/domain"
+	"github.com/structx/message-broker/internal/adapter/port/http/controller"
+	"github.com/structx/message-broker/internal/core/domain"
 )
 
 // NewRouter return new chi router

@@ -10,8 +10,8 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/trevatk/go-pkg/adapter/port/http/controller"
-	"github.com/trevatk/mora/internal/core/domain"
+	"github.com/structx/go-pkg/adapter/port/http/controller"
+	"github.com/structx/message-broker/internal/core/domain"
 )
 
 // Raft controller
