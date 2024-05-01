@@ -5,9 +5,9 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/trevatk/go-pkg/adapter/logging"
-	"github.com/trevatk/mora/internal/adapter/port/http/router"
-	"github.com/trevatk/mora/internal/core/domain"
+	"github.com/structx/go-pkg/adapter/logging"
+	"github.com/structx/message-broker/internal/adapter/port/http/router"
+	"github.com/structx/message-broker/internal/core/domain"
 )
 
 func init() {

@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	pkgdomain "github.com/trevatk/go-pkg/domain"
+	pkgdomain "github.com/structx/go-pkg/domain"
 )
 
 // NewHTTPServer return new http server

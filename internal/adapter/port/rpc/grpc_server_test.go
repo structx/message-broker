@@ -10,12 +10,12 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/trevatk/go-pkg/adapter/logging"
-	"github.com/trevatk/go-pkg/adapter/setup"
-	pb "github.com/trevatk/go-pkg/proto/messaging/v1"
-	"github.com/trevatk/go-pkg/util/decode"
-	"github.com/trevatk/mora/internal/adapter/port/rpc"
-	"github.com/trevatk/mora/internal/core/domain"
+	"github.com/structx/go-pkg/adapter/logging"
+	"github.com/structx/go-pkg/adapter/setup"
+	pb "github.com/structx/go-pkg/proto/messaging/v1"
+	"github.com/structx/go-pkg/util/decode"
+	"github.com/structx/message-broker/internal/adapter/port/rpc"
+	"github.com/structx/message-broker/internal/core/domain"
 )
 
 func init() {

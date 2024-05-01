@@ -12,10 +12,10 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/trevatk/go-pkg/adapter/logging"
+	"github.com/structx/go-pkg/adapter/logging"
 
-	"github.com/trevatk/mora/internal/adapter/port/http/controller"
-	"github.com/trevatk/mora/internal/core/domain"
+	"github.com/structx/message-broker/internal/adapter/port/http/controller"
+	"github.com/structx/message-broker/internal/core/domain"
 )
 
 func init() {

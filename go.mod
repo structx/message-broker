@@ -1,4 +1,4 @@
-module github.com/trevatk/mora
+module github.com/structx/message-broker
 
 go 1.22.2
 
@@ -6,7 +6,7 @@ require go.uber.org/fx v1.21.1
 
 require (
 	github.com/Jille/raftadmin v1.2.1
-	github.com/trevatk/go-pkg v0.0.9
+	github.com/structx/go-pkg v0.0.2
 )
 
 require (

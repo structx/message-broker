@@ -12,16 +12,16 @@ import (
 
 	"github.com/hashicorp/raft"
 
-	"github.com/trevatk/go-pkg/adapter/logging"
-	"github.com/trevatk/go-pkg/adapter/setup"
-	pkgdomain "github.com/trevatk/go-pkg/domain"
-	"github.com/trevatk/go-pkg/util/decode"
+	"github.com/structx/go-pkg/adapter/logging"
+	"github.com/structx/go-pkg/adapter/setup"
+	pkgdomain "github.com/structx/go-pkg/domain"
+	"github.com/structx/go-pkg/util/decode"
 
-	"github.com/trevatk/mora/internal/adapter/port/http/router"
-	"github.com/trevatk/mora/internal/adapter/port/http/server"
-	"github.com/trevatk/mora/internal/adapter/port/rpc"
-	"github.com/trevatk/mora/internal/core/domain"
-	"github.com/trevatk/mora/internal/core/service"
+	"github.com/structx/message-broker/internal/adapter/port/http/router"
+	"github.com/structx/message-broker/internal/adapter/port/http/server"
+	"github.com/structx/message-broker/internal/adapter/port/rpc"
+	"github.com/structx/message-broker/internal/core/domain"
+	"github.com/structx/message-broker/internal/core/service"
 )
 
 func main() {
